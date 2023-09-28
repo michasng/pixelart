@@ -38,17 +38,39 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
   void initState() {
     super.initState();
 
-    final pixels = _generatePixels(widget.initialFillColor);
-
-    final initialTransform = Matrix4.identity()
-      ..translate((widget.constraints.maxWidth - widget.width) / 2,
-          (widget.constraints.maxHeight - widget.height) / 2);
+    final initialTransform = createCenterTransform(
+      widget.constraints,
+      widget.width,
+      widget.height,
+    );
     transformationController = TransformationController(initialTransform);
 
+    final pixels = _generatePixels(widget.initialFillColor);
     _pixelPainter = PixelArtPainter(
       pixels: pixels,
       showGrid: showGrid,
     );
+  }
+
+  Matrix4 createCenterTransform(
+    BoxConstraints constraints,
+    int width,
+    int height,
+  ) {
+    final constrainsRatio = constraints.maxWidth / constraints.maxHeight;
+    final canvasRatio = width / height;
+    late final double initialScale;
+    if (constrainsRatio < canvasRatio) {
+      initialScale = constraints.maxWidth / width;
+    } else {
+      initialScale = constraints.maxHeight / height;
+    }
+    final emptyWidth = constraints.maxWidth - (width * initialScale);
+    final emptyHeight = constraints.maxHeight - (height * initialScale);
+
+    return Matrix4.identity()
+      ..translate(emptyWidth / 2, emptyHeight / 2)
+      ..scale(initialScale);
   }
 
   List<List<Color?>> _generatePixels(Color? color) {
