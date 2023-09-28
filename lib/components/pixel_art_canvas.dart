@@ -6,6 +6,7 @@ class PixelArtCanvas extends StatefulWidget {
   final Color? initialFillColor;
   final Color? Function() getColor;
   final bool showGrid;
+  final int minScaleToShowGrid;
 
   const PixelArtCanvas({
     super.key,
@@ -15,6 +16,7 @@ class PixelArtCanvas extends StatefulWidget {
     required this.initialFillColor,
     required this.getColor,
     required this.showGrid,
+    this.minScaleToShowGrid = 5,
   });
 
   @override
@@ -25,20 +27,26 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
   late final TransformationController transformationController;
   late PixelArtPainter _pixelPainter;
 
+  bool get showGrid {
+    final scale = transformationController.value.getMaxScaleOnAxis();
+    return widget.showGrid && scale >= widget.minScaleToShowGrid;
+  }
+
   @override
   void initState() {
     super.initState();
 
     final pixels = _generatePixels(widget.initialFillColor);
-    _pixelPainter = PixelArtPainter(
-      pixels: pixels,
-      showGrid: widget.showGrid,
-    );
 
     final initialTransform = Matrix4.identity()
       ..translate((widget.constraints.maxWidth - widget.width) / 2,
           (widget.constraints.maxHeight - widget.height) / 2);
     transformationController = TransformationController(initialTransform);
+
+    _pixelPainter = PixelArtPainter(
+      pixels: pixels,
+      showGrid: showGrid,
+    );
   }
 
   List<List<Color?>> _generatePixels(Color? color) {
@@ -46,11 +54,6 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
       widget.height,
       (index) => List.filled(widget.width, color),
     );
-  }
-
-  (int x, int y) localToPixel(Offset localPosition) {
-    var pixelPosition = localPosition;
-    return (pixelPosition.dx.toInt(), pixelPosition.dy.toInt());
   }
 
   @override
@@ -61,16 +64,24 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
       boundaryMargin: const EdgeInsets.all(double.infinity),
       maxScale: 100,
       minScale: 1,
+      onInteractionEnd: (_) {
+        setState(() {
+          _pixelPainter = PixelArtPainter(
+            pixels: _pixelPainter.pixels,
+            showGrid: showGrid,
+          );
+        });
+      },
       child: GestureDetector(
         onTapDown: (details) {
-          var (x, y) = localToPixel(details.localPosition);
+          var (x, y) = (details.localPosition.dx, details.localPosition.dy);
           setState(() {
             final pixels = _pixelPainter.pixels;
-            pixels[y][x] = widget.getColor();
+            pixels[y.toInt()][x.toInt()] = widget.getColor();
             setState(() {
               _pixelPainter = PixelArtPainter(
                 pixels: pixels,
-                showGrid: widget.showGrid,
+                showGrid: showGrid,
               );
             });
           });
