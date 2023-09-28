@@ -39,10 +39,11 @@ class _PixelArtPageState extends State<PixelArtPage> {
             ),
         ],
       ),
-      body: Center(
-        child: PixelArtCanvas(
-          width: 10,
-          height: 12,
+      body: LayoutBuilder(
+        builder: (context, constraints) => PixelArtCanvas(
+          constraints: constraints,
+          width: 32,
+          height: 16,
           getColor: () => _selectedColor,
           initialFillColor: Colors.grey,
         ),

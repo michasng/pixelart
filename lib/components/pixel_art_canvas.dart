@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 class PixelArtCanvas extends StatefulWidget {
+  final BoxConstraints constraints;
   final int width, height;
   final Color? initialFillColor;
   final Color? Function() getColor;
 
   const PixelArtCanvas({
     super.key,
+    required this.constraints,
     required this.width,
     required this.height,
     required this.initialFillColor,
@@ -18,8 +20,8 @@ class PixelArtCanvas extends StatefulWidget {
 }
 
 class _PixelArtCanvasState extends State<PixelArtCanvas> {
+  late final TransformationController transformationController;
   late PixelArtPainter _pixelPainter;
-  late double _scale;
 
   @override
   void initState() {
@@ -27,7 +29,11 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
 
     final pixels = _generatePixels(widget.initialFillColor);
     _pixelPainter = PixelArtPainter(pixels: pixels);
-    _scale = 20;
+
+    final initialTransform = Matrix4.identity()
+      ..translate((widget.constraints.maxWidth - widget.width) / 2,
+          (widget.constraints.maxHeight - widget.height) / 2);
+    transformationController = TransformationController(initialTransform);
   }
 
   List<List<Color?>> _generatePixels(Color? color) {
@@ -38,31 +44,34 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
   }
 
   (int x, int y) localToPixel(Offset localPosition) {
-    var pixelPosition = localPosition / _scale;
+    var pixelPosition = localPosition;
     return (pixelPosition.dx.toInt(), pixelPosition.dy.toInt());
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (details) {
-        var (x, y) = localToPixel(details.localPosition);
-        setState(() {
-          final pixels = _pixelPainter.pixels;
-          pixels[y][x] = widget.getColor();
+    return InteractiveViewer(
+      transformationController: transformationController,
+      constrained: false,
+      boundaryMargin: const EdgeInsets.all(double.infinity),
+      maxScale: 50,
+      minScale: 0.1,
+      child: GestureDetector(
+        onTapDown: (details) {
+          var (x, y) = localToPixel(details.localPosition);
           setState(() {
-            _pixelPainter = PixelArtPainter(pixels: pixels);
+            final pixels = _pixelPainter.pixels;
+            pixels[y][x] = widget.getColor();
+            setState(() {
+              _pixelPainter = PixelArtPainter(pixels: pixels);
+            });
           });
-        });
-      },
-      child: Transform.scale(
-        alignment: Alignment.topLeft,
-        scale: _scale,
+        },
         child: CustomPaint(
           willChange: true,
           isComplex: true,
           painter: _pixelPainter,
-          size: Size(widget.width * _scale, widget.height * _scale),
+          size: Size(widget.width.toDouble(), widget.height.toDouble()),
         ),
       ),
     );
@@ -70,8 +79,6 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
 }
 
 class PixelArtPainter extends CustomPainter {
-  static const pixelSize = 1.0;
-
   List<List<Color?>> pixels;
 
   PixelArtPainter({required this.pixels});
@@ -85,7 +92,7 @@ class PixelArtPainter extends CustomPainter {
         if (pixels[y][x] == null) continue;
         paint.color = pixels[y][x]!;
         canvas.drawRect(
-          Rect.fromLTWH(x * pixelSize, y * pixelSize, pixelSize, pixelSize),
+          Rect.fromLTWH(x.toDouble(), y.toDouble(), 1.0, 1.0),
           paint,
         );
       }
