@@ -46,6 +46,7 @@ class _PixelArtPageState extends State<PixelArtPage> {
           height: 16,
           getColor: () => _selectedColor,
           initialFillColor: Colors.grey,
+          showGrid: true,
         ),
       ),
     );

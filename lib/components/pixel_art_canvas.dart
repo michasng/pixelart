@@ -5,6 +5,7 @@ class PixelArtCanvas extends StatefulWidget {
   final int width, height;
   final Color? initialFillColor;
   final Color? Function() getColor;
+  final bool showGrid;
 
   const PixelArtCanvas({
     super.key,
@@ -13,6 +14,7 @@ class PixelArtCanvas extends StatefulWidget {
     required this.height,
     required this.initialFillColor,
     required this.getColor,
+    required this.showGrid,
   });
 
   @override
@@ -28,7 +30,10 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
     super.initState();
 
     final pixels = _generatePixels(widget.initialFillColor);
-    _pixelPainter = PixelArtPainter(pixels: pixels);
+    _pixelPainter = PixelArtPainter(
+      pixels: pixels,
+      showGrid: widget.showGrid,
+    );
 
     final initialTransform = Matrix4.identity()
       ..translate((widget.constraints.maxWidth - widget.width) / 2,
@@ -54,8 +59,8 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
       transformationController: transformationController,
       constrained: false,
       boundaryMargin: const EdgeInsets.all(double.infinity),
-      maxScale: 50,
-      minScale: 0.1,
+      maxScale: 100,
+      minScale: 1,
       child: GestureDetector(
         onTapDown: (details) {
           var (x, y) = localToPixel(details.localPosition);
@@ -63,7 +68,10 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
             final pixels = _pixelPainter.pixels;
             pixels[y][x] = widget.getColor();
             setState(() {
-              _pixelPainter = PixelArtPainter(pixels: pixels);
+              _pixelPainter = PixelArtPainter(
+                pixels: pixels,
+                showGrid: widget.showGrid,
+              );
             });
           });
         },
@@ -80,8 +88,14 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
 
 class PixelArtPainter extends CustomPainter {
   List<List<Color?>> pixels;
+  bool showGrid;
+  Color gridColor;
 
-  PixelArtPainter({required this.pixels});
+  PixelArtPainter({
+    required this.pixels,
+    required this.showGrid,
+    this.gridColor = Colors.black,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -91,6 +105,15 @@ class PixelArtPainter extends CustomPainter {
       for (int x = 0; x < pixels[y].length; x++) {
         if (pixels[y][x] == null) continue;
         paint.color = pixels[y][x]!;
+        paint.style = PaintingStyle.fill;
+        canvas.drawRect(
+          Rect.fromLTWH(x.toDouble(), y.toDouble(), 1.0, 1.0),
+          paint,
+        );
+        paint.style = PaintingStyle.stroke;
+        if (showGrid) {
+          paint.color = gridColor;
+        }
         canvas.drawRect(
           Rect.fromLTWH(x.toDouble(), y.toDouble(), 1.0, 1.0),
           paint,
