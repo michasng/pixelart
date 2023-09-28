@@ -56,6 +56,23 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
     );
   }
 
+  void interactWithPixel(Offset localPosition) {
+    var (x, y) = (localPosition.dx.toInt(), localPosition.dy.toInt());
+
+    if (x < 0 || x >= widget.width || y < 0 || y >= widget.height) return;
+
+    setState(() {
+      final pixels = _pixelPainter.pixels;
+      pixels[y][x] = widget.getColor();
+      setState(() {
+        _pixelPainter = PixelArtPainter(
+          pixels: pixels,
+          showGrid: showGrid,
+        );
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return InteractiveViewer(
@@ -73,19 +90,11 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
         });
       },
       child: GestureDetector(
-        onTapDown: (details) {
-          var (x, y) = (details.localPosition.dx, details.localPosition.dy);
-          setState(() {
-            final pixels = _pixelPainter.pixels;
-            pixels[y.toInt()][x.toInt()] = widget.getColor();
-            setState(() {
-              _pixelPainter = PixelArtPainter(
-                pixels: pixels,
-                showGrid: showGrid,
-              );
-            });
-          });
-        },
+        onTapDown: (details) => interactWithPixel(details.localPosition),
+        onVerticalDragUpdate: (details) =>
+            interactWithPixel(details.localPosition),
+        onHorizontalDragUpdate: (details) =>
+            interactWithPixel(details.localPosition),
         child: CustomPaint(
           willChange: true,
           isComplex: true,
