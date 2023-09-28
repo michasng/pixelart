@@ -7,6 +7,7 @@ class PixelArtCanvas extends StatefulWidget {
   final Color? Function() getColor;
   final bool showGrid;
   final int minScaleToShowGrid;
+  final double maxScale;
 
   const PixelArtCanvas({
     super.key,
@@ -17,6 +18,7 @@ class PixelArtCanvas extends StatefulWidget {
     required this.getColor,
     required this.showGrid,
     this.minScaleToShowGrid = 5,
+    this.maxScale = 100,
   });
 
   @override
@@ -79,7 +81,7 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
       transformationController: transformationController,
       constrained: false,
       boundaryMargin: const EdgeInsets.all(double.infinity),
-      maxScale: 100,
+      maxScale: widget.maxScale,
       minScale: 1,
       onInteractionEnd: (_) {
         setState(() {
