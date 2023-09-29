@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pixelart/components/unconstrained_interactive_viewer.dart';
 
 class PixelArtCanvas extends StatefulWidget {
-  final BoxConstraints constraints;
   final int width, height;
   final Color? initialFillColor;
   final Color? Function() getColor;
@@ -11,7 +11,6 @@ class PixelArtCanvas extends StatefulWidget {
 
   const PixelArtCanvas({
     super.key,
-    required this.constraints,
     required this.width,
     required this.height,
     required this.initialFillColor,
@@ -26,51 +25,27 @@ class PixelArtCanvas extends StatefulWidget {
 }
 
 class _PixelArtCanvasState extends State<PixelArtCanvas> {
-  late final TransformationController transformationController;
+  final _unconstrainedInteractiveViewerKey =
+      GlobalKey<UnconstrainedInteractiveViewerState>();
   late PixelArtPainter _pixelPainter;
 
+  Size get size => Size(widget.width.toDouble(), widget.height.toDouble());
+
   bool get showGrid {
-    final scale = transformationController.value.getMaxScaleOnAxis();
-    return widget.showGrid && scale >= widget.minScaleToShowGrid;
+    final scale = _unconstrainedInteractiveViewerKey.currentState?.scale;
+    return widget.showGrid &&
+        (scale == null || scale >= widget.minScaleToShowGrid);
   }
 
   @override
   void initState() {
     super.initState();
 
-    final initialTransform = createCenterTransform(
-      widget.constraints,
-      widget.width,
-      widget.height,
-    );
-    transformationController = TransformationController(initialTransform);
-
     final pixels = _generatePixels(widget.initialFillColor);
     _pixelPainter = PixelArtPainter(
       pixels: pixels,
       showGrid: showGrid,
     );
-  }
-
-  Matrix4 createCenterTransform(
-    BoxConstraints constraints,
-    int width,
-    int height,
-  ) {
-    final constrainsRatio = constraints.maxWidth / constraints.maxHeight;
-    final canvasRatio = width / height;
-    late final double initialScale;
-    if (constrainsRatio < canvasRatio) {
-      initialScale = constraints.maxWidth / width;
-    } else {
-      initialScale = constraints.maxHeight / height;
-    }
-    final emptyWidth = constraints.maxWidth - (width * initialScale);
-    final emptyHeight = constraints.maxHeight - (height * initialScale);
-
-    return Matrix4.identity()
-      ..translate(emptyWidth / 2, emptyHeight / 2)
-      ..scale(initialScale);
   }
 
   List<List<Color?>> _generatePixels(Color? color) {
@@ -85,34 +60,27 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
 
     if (x < 0 || x >= widget.width || y < 0 || y >= widget.height) return;
 
+    final pixels = _pixelPainter.pixels;
+    pixels[y][x] = widget.getColor();
+    updatePixelPainter();
+  }
+
+  void updatePixelPainter() {
     setState(() {
-      final pixels = _pixelPainter.pixels;
-      pixels[y][x] = widget.getColor();
-      setState(() {
-        _pixelPainter = PixelArtPainter(
-          pixels: pixels,
-          showGrid: showGrid,
-        );
-      });
+      _pixelPainter = PixelArtPainter(
+        pixels: _pixelPainter.pixels,
+        showGrid: showGrid,
+      );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return InteractiveViewer(
-      transformationController: transformationController,
-      constrained: false,
-      boundaryMargin: const EdgeInsets.all(double.infinity),
-      maxScale: widget.maxScale,
+    return UnconstrainedInteractiveViewer(
+      key: _unconstrainedInteractiveViewerKey,
+      contentSize: size,
       minScale: 1,
-      onInteractionEnd: (_) {
-        setState(() {
-          _pixelPainter = PixelArtPainter(
-            pixels: _pixelPainter.pixels,
-            showGrid: showGrid,
-          );
-        });
-      },
+      onInteractionEnd: (_) => updatePixelPainter(),
       child: GestureDetector(
         onTapDown: (details) => interactWithPixel(details.localPosition),
         onVerticalDragUpdate: (details) =>
@@ -123,7 +91,7 @@ class _PixelArtCanvasState extends State<PixelArtCanvas> {
           willChange: true,
           isComplex: true,
           painter: _pixelPainter,
-          size: Size(widget.width.toDouble(), widget.height.toDouble()),
+          size: size,
         ),
       ),
     );
