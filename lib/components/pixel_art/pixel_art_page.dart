@@ -18,6 +18,7 @@ class PixelArtPage extends StatefulWidget {
 }
 
 class _PixelArtPageState extends State<PixelArtPage> {
+  final _pixelArtCanvasKey = GlobalKey<PixelArtCanvasState>();
   Color? _selectedColor = Colors.black;
 
   @override
@@ -27,6 +28,19 @@ class _PixelArtPageState extends State<PixelArtPage> {
         title: const Text('Pixel Art App'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          IconButton(
+            onPressed: () {
+              _pixelArtCanvasKey.currentState?.undo();
+            },
+            icon: const Icon(Icons.undo),
+          ),
+          IconButton(
+            onPressed: () {
+              _pixelArtCanvasKey.currentState?.redo();
+            },
+            icon: const Icon(Icons.redo),
+          ),
+          const Spacer(),
           for (var color in PixelArtPage.colors)
             IconButton(
               onPressed: () {
@@ -40,6 +54,7 @@ class _PixelArtPageState extends State<PixelArtPage> {
         ],
       ),
       body: PixelArtCanvas(
+        key: _pixelArtCanvasKey,
         width: 32,
         height: 16,
         getColor: () => _selectedColor,
