@@ -20,6 +20,8 @@ class PixelArtPage extends StatefulWidget {
 class _PixelArtPageState extends State<PixelArtPage> {
   final _pixelArtCanvasKey = GlobalKey<PixelArtCanvasState>();
   Color? _selectedColor = Colors.black;
+  bool _canUndo = false;
+  bool _canRedo = false;
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +31,19 @@ class _PixelArtPageState extends State<PixelArtPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
-            onPressed: () {
-              _pixelArtCanvasKey.currentState?.undo();
-            },
+            onPressed: _canUndo
+                ? () {
+                    _pixelArtCanvasKey.currentState?.undo();
+                  }
+                : null,
             icon: const Icon(Icons.undo),
           ),
           IconButton(
-            onPressed: () {
-              _pixelArtCanvasKey.currentState?.redo();
-            },
+            onPressed: _canRedo
+                ? () {
+                    _pixelArtCanvasKey.currentState?.redo();
+                  }
+                : null,
             icon: const Icon(Icons.redo),
           ),
           const Spacer(),
@@ -57,9 +63,15 @@ class _PixelArtPageState extends State<PixelArtPage> {
         key: _pixelArtCanvasKey,
         width: 32,
         height: 16,
-        getColor: () => _selectedColor,
+        selectedColor: _selectedColor,
         initialFillColor: Colors.grey,
         showGrid: true,
+        onHistoryChanged: ({required canUndo, required canRedo}) {
+          setState(() {
+            _canUndo = canUndo;
+            _canRedo = canRedo;
+          });
+        },
       ),
     );
   }

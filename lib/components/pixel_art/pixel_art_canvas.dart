@@ -11,18 +11,21 @@ import 'package:pixelart/components/unconstrained_interactive_viewer.dart';
 class PixelArtCanvas extends StatefulWidget {
   final int width, height;
   final Color? initialFillColor;
-  final Color? Function() getColor;
+  final Color? selectedColor;
   final bool showGrid;
   final int minScaleToShowGrid;
   final double maxScale;
+  final void Function({required bool canUndo, required bool canRedo})
+      onHistoryChanged;
 
   const PixelArtCanvas({
     super.key,
     required this.width,
     required this.height,
     required this.initialFillColor,
-    required this.getColor,
+    required this.selectedColor,
     required this.showGrid,
+    required this.onHistoryChanged,
     this.minScaleToShowGrid = 5,
     this.maxScale = 100,
   });
@@ -80,7 +83,7 @@ class PixelArtCanvasState extends State<PixelArtCanvas> {
     final position = Point(localPosition.dx.toInt(), localPosition.dy.toInt());
     if (!isInCanvasBounds(position)) return;
 
-    final color = widget.getColor();
+    final color = widget.selectedColor;
     if (color == null) {
       dispatchEvent(PixelArtEraseEvent(position: position));
     } else {
@@ -97,6 +100,7 @@ class PixelArtCanvasState extends State<PixelArtCanvas> {
     final canvasStateCopy = _pixelPainter.canvasState.deepCopy();
     event.apply(canvasStateCopy);
     _updatePixelPainter(canvasStateCopy);
+    _historyChanged();
   }
 
   void undo() {
@@ -107,6 +111,7 @@ class PixelArtCanvasState extends State<PixelArtCanvas> {
 
     final canvasState = _canvasStateHistory.removeLast();
     _updatePixelPainter(canvasState);
+    _historyChanged();
   }
 
   void redo() {
@@ -114,6 +119,13 @@ class PixelArtCanvasState extends State<PixelArtCanvas> {
 
     final event = _undoneEvents.removeLast();
     dispatchEvent(event, false);
+  }
+
+  void _historyChanged() {
+    widget.onHistoryChanged(
+      canUndo: canUndo,
+      canRedo: canRedo,
+    );
   }
 
   void _updatePixelPainter([CanvasState? updatedCanvasState]) {
