@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pixelart/components/pixel_art_page.dart';
+import 'package:pixelart/components/pixel_art/pixel_art_page.dart';
 
 void main() {
   runApp(const App());

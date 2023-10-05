@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pixelart/components/pixel_art_canvas.dart';
+import 'package:pixelart/components/pixel_art/pixel_art_canvas.dart';
 
 class PixelArtPage extends StatefulWidget {
   static const colors = [
