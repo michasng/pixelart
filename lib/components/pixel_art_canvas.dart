@@ -115,13 +115,14 @@ class PixelArtPainter extends CustomPainter {
 
     for (int y = 0; y < pixels.length; y++) {
       for (int x = 0; x < pixels[y].length; x++) {
-        if (pixels[y][x] == null) continue;
-        paint.color = pixels[y][x]!;
-        paint.style = PaintingStyle.fill;
-        canvas.drawRect(
-          Rect.fromLTWH(x.toDouble(), y.toDouble(), 1.0, 1.0),
-          paint,
-        );
+        if (pixels[y][x] != null) {
+          paint.color = pixels[y][x]!;
+          paint.style = PaintingStyle.fill;
+          canvas.drawRect(
+            Rect.fromLTWH(x.toDouble(), y.toDouble(), 1.0, 1.0),
+            paint,
+          );
+        }
         paint.style = PaintingStyle.stroke;
         if (showGrid) {
           paint.color = gridColor;
