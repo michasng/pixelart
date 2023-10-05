@@ -83,11 +83,15 @@ class PixelArtCanvasState extends State<PixelArtCanvas> {
     final position = Point(localPosition.dx.toInt(), localPosition.dy.toInt());
     if (!isInCanvasBounds(position)) return;
 
-    final color = widget.selectedColor;
-    if (color == null) {
+    final currentColor =
+        _pixelPainter.canvasState.pixels[position.y][position.x];
+    final selectedColor = widget.selectedColor;
+    if (currentColor == selectedColor) return;
+    if (selectedColor == null) {
       dispatchEvent(PixelArtEraseEvent(position: position));
     } else {
-      dispatchEvent(PixelArtDrawEvent(position: position, color: color));
+      dispatchEvent(
+          PixelArtDrawEvent(position: position, color: selectedColor));
     }
   }
 
