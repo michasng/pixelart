@@ -2,15 +2,15 @@ import 'dart:ui';
 
 import 'package:pixelart/components/copy_matrix.dart';
 
-class CanvasState {
+class CanvasPainterState {
   final List<List<Color?>> pixels;
 
-  const CanvasState({
+  const CanvasPainterState({
     required this.pixels,
   });
 
-  CanvasState deepCopy() {
-    return CanvasState(
+  CanvasPainterState deepCopy() {
+    return CanvasPainterState(
       pixels: copyMatrix(pixels),
     );
   }

@@ -1,14 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:pixelart/components/pixel_art/canvas_state.dart';
-import 'package:pixelart/components/pixel_art/events/pixel_art_draw_event.dart';
-import 'package:pixelart/components/pixel_art/events/pixel_art_erase_event.dart';
-import 'package:pixelart/components/pixel_art/events/pixel_art_event.dart';
-import 'package:pixelart/components/pixel_art/pixel_art_painter.dart';
+import 'package:pixelart/components/canvas/canvas_painter.dart';
+import 'package:pixelart/components/canvas/canvas_painter_state.dart';
+import 'package:pixelart/components/canvas/events/canvas_draw_event.dart';
+import 'package:pixelart/components/canvas/events/canvas_erase_event.dart';
+import 'package:pixelart/components/canvas/events/canvas_event.dart';
 import 'package:pixelart/components/unconstrained_interactive_viewer.dart';
 
-class PixelArtCanvas extends StatefulWidget {
+class Canvas extends StatefulWidget {
   final int width, height;
   final Color? initialFillColor;
   final Color? selectedColor;
@@ -18,7 +18,7 @@ class PixelArtCanvas extends StatefulWidget {
   final void Function({required bool canUndo, required bool canRedo})
       onHistoryChanged;
 
-  const PixelArtCanvas({
+  const Canvas({
     super.key,
     required this.width,
     required this.height,
@@ -31,17 +31,17 @@ class PixelArtCanvas extends StatefulWidget {
   });
 
   @override
-  State<PixelArtCanvas> createState() => PixelArtCanvasState();
+  State<Canvas> createState() => CanvasState();
 }
 
-class PixelArtCanvasState extends State<PixelArtCanvas> {
+class CanvasState extends State<Canvas> {
   final _unconstrainedInteractiveViewerKey =
       GlobalKey<UnconstrainedInteractiveViewerState>();
-  late PixelArtPainter _pixelPainter;
+  late CanvasPainter _pixelPainter;
 
-  final List<CanvasState> _canvasStateHistory = [];
-  final List<PixelArtEvent> _eventHistory = [];
-  final List<PixelArtEvent> _undoneEvents = [];
+  final List<CanvasPainterState> _canvasStateHistory = [];
+  final List<CanvasEvent> _eventHistory = [];
+  final List<CanvasEvent> _undoneEvents = [];
 
   Size get size => Size(widget.width.toDouble(), widget.height.toDouble());
 
@@ -59,8 +59,8 @@ class PixelArtCanvasState extends State<PixelArtCanvas> {
     super.initState();
 
     final pixels = _generatePixels(widget.initialFillColor);
-    _pixelPainter = PixelArtPainter(
-      canvasState: CanvasState(pixels: pixels),
+    _pixelPainter = CanvasPainter(
+      canvasState: CanvasPainterState(pixels: pixels),
       showGrid: showGrid,
     );
   }
@@ -88,14 +88,13 @@ class PixelArtCanvasState extends State<PixelArtCanvas> {
     final selectedColor = widget.selectedColor;
     if (currentColor == selectedColor) return;
     if (selectedColor == null) {
-      dispatchEvent(PixelArtEraseEvent(position: position));
+      dispatchEvent(CanvasEraseEvent(position: position));
     } else {
-      dispatchEvent(
-          PixelArtDrawEvent(position: position, color: selectedColor));
+      dispatchEvent(CanvasDrawEvent(position: position, color: selectedColor));
     }
   }
 
-  void dispatchEvent(PixelArtEvent event, [bool clearUndoneEvents = true]) {
+  void dispatchEvent(CanvasEvent event, [bool clearUndoneEvents = true]) {
     if (clearUndoneEvents) _undoneEvents.clear();
 
     _canvasStateHistory.add(_pixelPainter.canvasState);
@@ -132,9 +131,9 @@ class PixelArtCanvasState extends State<PixelArtCanvas> {
     );
   }
 
-  void _updatePixelPainter([CanvasState? updatedCanvasState]) {
+  void _updatePixelPainter([CanvasPainterState? updatedCanvasState]) {
     setState(() {
-      _pixelPainter = PixelArtPainter(
+      _pixelPainter = CanvasPainter(
         canvasState: updatedCanvasState ?? _pixelPainter.canvasState,
         showGrid: showGrid,
       );

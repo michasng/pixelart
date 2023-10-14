@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pixelart/components/pixel_art/pixel_art_canvas.dart';
+import 'package:pixelart/components/canvas/canvas.dart';
 
-class PixelArtPage extends StatefulWidget {
+class CanvasPage extends StatefulWidget {
   static const colors = [
     Colors.black,
     Colors.red,
@@ -11,14 +11,14 @@ class PixelArtPage extends StatefulWidget {
     null,
   ];
 
-  const PixelArtPage({super.key});
+  const CanvasPage({super.key});
 
   @override
-  State<PixelArtPage> createState() => _PixelArtPageState();
+  State<CanvasPage> createState() => _CanvasPageState();
 }
 
-class _PixelArtPageState extends State<PixelArtPage> {
-  final _pixelArtCanvasKey = GlobalKey<PixelArtCanvasState>();
+class _CanvasPageState extends State<CanvasPage> {
+  final _canvasKey = GlobalKey<CanvasState>();
   Color? _selectedColor = Colors.black;
   bool _canUndo = false;
   bool _canRedo = false;
@@ -33,7 +33,7 @@ class _PixelArtPageState extends State<PixelArtPage> {
           IconButton(
             onPressed: _canUndo
                 ? () {
-                    _pixelArtCanvasKey.currentState?.undo();
+                    _canvasKey.currentState?.undo();
                   }
                 : null,
             icon: const Icon(Icons.undo),
@@ -41,13 +41,13 @@ class _PixelArtPageState extends State<PixelArtPage> {
           IconButton(
             onPressed: _canRedo
                 ? () {
-                    _pixelArtCanvasKey.currentState?.redo();
+                    _canvasKey.currentState?.redo();
                   }
                 : null,
             icon: const Icon(Icons.redo),
           ),
           const Spacer(),
-          for (var color in PixelArtPage.colors)
+          for (var color in CanvasPage.colors)
             IconButton(
               onPressed: () {
                 setState(() {
@@ -59,8 +59,8 @@ class _PixelArtPageState extends State<PixelArtPage> {
             ),
         ],
       ),
-      body: PixelArtCanvas(
-        key: _pixelArtCanvasKey,
+      body: Canvas(
+        key: _canvasKey,
         width: 32,
         height: 16,
         selectedColor: _selectedColor,

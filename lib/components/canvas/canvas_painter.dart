@@ -1,12 +1,12 @@
 import 'package:flutter/rendering.dart';
-import 'package:pixelart/components/pixel_art/canvas_state.dart';
+import 'package:pixelart/components/canvas/canvas_painter_state.dart';
 
-class PixelArtPainter extends CustomPainter {
-  final CanvasState canvasState;
+class CanvasPainter extends CustomPainter {
+  final CanvasPainterState canvasState;
   final bool showGrid;
   final Color gridColor;
 
-  const PixelArtPainter({
+  const CanvasPainter({
     required this.canvasState,
     required this.showGrid,
     this.gridColor = const Color.fromARGB(255, 0, 0, 0),
@@ -15,7 +15,7 @@ class PixelArtPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
-    final CanvasState(:pixels) = canvasState;
+    final CanvasPainterState(:pixels) = canvasState;
 
     for (int y = 0; y < pixels.length; y++) {
       for (int x = 0; x < pixels[y].length; x++) {
@@ -40,5 +40,5 @@ class PixelArtPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(PixelArtPainter oldDelegate) => true;
+  bool shouldRepaint(CanvasPainter oldDelegate) => true;
 }
