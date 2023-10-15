@@ -1,13 +1,12 @@
 import 'package:flutter/rendering.dart';
-import 'package:pixelart/components/canvas/canvas_painter_state.dart';
 
 class CanvasPainter extends CustomPainter {
-  final CanvasPainterState canvasState;
+  final List<List<Color?>> pixels;
   final bool showGrid;
   final Color gridColor;
 
   const CanvasPainter({
-    required this.canvasState,
+    required this.pixels,
     required this.showGrid,
     this.gridColor = const Color.fromARGB(255, 0, 0, 0),
   });
@@ -15,7 +14,6 @@ class CanvasPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
-    final CanvasPainterState(:pixels) = canvasState;
 
     for (int y = 0; y < pixels.length; y++) {
       for (int x = 0; x < pixels[y].length; x++) {

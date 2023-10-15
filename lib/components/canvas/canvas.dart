@@ -1,11 +1,13 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:pixelart/components/canvas/canvas_change.dart';
+import 'package:pixelart/components/canvas/canvas_history_item.dart';
 import 'package:pixelart/components/canvas/canvas_painter.dart';
-import 'package:pixelart/components/canvas/canvas_painter_state.dart';
-import 'package:pixelart/components/canvas/events/canvas_draw_event.dart';
-import 'package:pixelart/components/canvas/events/canvas_erase_event.dart';
-import 'package:pixelart/components/canvas/events/canvas_event.dart';
+import 'package:pixelart/components/canvas/tools/canvas_draw_tool.dart';
+import 'package:pixelart/components/canvas/tools/canvas_erase_tool.dart';
+import 'package:pixelart/components/canvas/tools/canvas_tool.dart';
+import 'package:pixelart/components/canvas/tools/canvas_tool_context.dart';
 import 'package:pixelart/components/unconstrained_interactive_viewer.dart';
 
 class Canvas extends StatefulWidget {
@@ -37,11 +39,10 @@ class Canvas extends StatefulWidget {
 class CanvasState extends State<Canvas> {
   final _unconstrainedInteractiveViewerKey =
       GlobalKey<UnconstrainedInteractiveViewerState>();
-  late CanvasPainter _pixelPainter;
+  late CanvasPainter _painter;
 
-  final List<CanvasPainterState> _canvasStateHistory = [];
-  final List<CanvasEvent> _eventHistory = [];
-  final List<CanvasEvent> _undoneEvents = [];
+  final List<CanvasHistoryItem> _history = [];
+  final List<CanvasHistoryItem> _undoneHistory = [];
 
   Size get size => Size(widget.width.toDouble(), widget.height.toDouble());
 
@@ -51,16 +52,16 @@ class CanvasState extends State<Canvas> {
         (scale == null || scale >= widget.minScaleToShowGrid);
   }
 
-  bool get canUndo => _eventHistory.isNotEmpty;
-  bool get canRedo => _undoneEvents.isNotEmpty;
+  bool get canUndo => _history.isNotEmpty;
+  bool get canRedo => _undoneHistory.isNotEmpty;
 
   @override
   void initState() {
     super.initState();
 
     final pixels = _generatePixels(widget.initialFillColor);
-    _pixelPainter = CanvasPainter(
-      canvasState: CanvasPainterState(pixels: pixels),
+    _painter = CanvasPainter(
+      pixels: pixels,
       showGrid: showGrid,
     );
   }
@@ -83,45 +84,58 @@ class CanvasState extends State<Canvas> {
     final position = Point(localPosition.dx.toInt(), localPosition.dy.toInt());
     if (!isInCanvasBounds(position)) return;
 
-    final currentColor =
-        _pixelPainter.canvasState.pixels[position.y][position.x];
+    final currentColor = _painter.pixels[position.y][position.x];
     final selectedColor = widget.selectedColor;
     if (currentColor == selectedColor) return;
+
+    final CanvasTool tool;
     if (selectedColor == null) {
-      dispatchEvent(CanvasEraseEvent(position: position));
+      tool = CanvasEraseTool();
     } else {
-      dispatchEvent(CanvasDrawEvent(position: position, color: selectedColor));
+      tool = CanvasDrawTool();
     }
+
+    final toolContext = CanvasToolContext(
+      canvasPainter: _painter,
+      selectedColor: selectedColor,
+      position: position,
+    );
+    final change = tool.use(toolContext);
+    _undoneHistory.clear();
+    applyChange(change);
   }
 
-  void dispatchEvent(CanvasEvent event, [bool clearUndoneEvents = true]) {
-    if (clearUndoneEvents) _undoneEvents.clear();
+  void applyChange(CanvasChange change) {
+    _history.add(CanvasHistoryItem(
+      change: change,
+      reverseChange: change.createReverseChange(_painter),
+    ));
 
-    _canvasStateHistory.add(_pixelPainter.canvasState);
-    _eventHistory.add(event);
-
-    final canvasStateCopy = _pixelPainter.canvasState.deepCopy();
-    event.apply(canvasStateCopy);
-    _updatePixelPainter(canvasStateCopy);
+    final updatedPainter = change.apply(_painter);
+    setState(() {
+      _painter = updatedPainter;
+    });
     _historyChanged();
   }
 
   void undo() {
     if (!canUndo) return;
 
-    final event = _eventHistory.removeLast();
-    _undoneEvents.add(event);
+    final historyItem = _history.removeLast();
+    _undoneHistory.add(historyItem);
 
-    final canvasState = _canvasStateHistory.removeLast();
-    _updatePixelPainter(canvasState);
+    final updatedPainter = historyItem.reverseChange.apply(_painter);
+    setState(() {
+      _painter = updatedPainter;
+    });
     _historyChanged();
   }
 
   void redo() {
     if (!canRedo) return;
 
-    final event = _undoneEvents.removeLast();
-    dispatchEvent(event, false);
+    final historyItem = _undoneHistory.removeLast();
+    applyChange(historyItem.change);
   }
 
   void _historyChanged() {
@@ -131,22 +145,18 @@ class CanvasState extends State<Canvas> {
     );
   }
 
-  void _updatePixelPainter([CanvasPainterState? updatedCanvasState]) {
-    setState(() {
-      _pixelPainter = CanvasPainter(
-        canvasState: updatedCanvasState ?? _pixelPainter.canvasState,
-        showGrid: showGrid,
-      );
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return UnconstrainedInteractiveViewer(
       key: _unconstrainedInteractiveViewerKey,
       contentSize: size,
       minScale: 1,
-      onInteractionEnd: (_) => _updatePixelPainter(),
+      onInteractionEnd: (_) => setState(() {
+        _painter = CanvasPainter(
+          pixels: _painter.pixels,
+          showGrid: showGrid,
+        );
+      }),
       child: GestureDetector(
         onTapDown: (details) => interactWithPixel(details.localPosition),
         onVerticalDragUpdate: (details) =>
@@ -156,7 +166,7 @@ class CanvasState extends State<Canvas> {
         child: CustomPaint(
           willChange: true,
           isComplex: true,
-          painter: _pixelPainter,
+          painter: _painter,
           size: size,
         ),
       ),
