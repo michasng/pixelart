@@ -1,122 +1,65 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:pixelart/components/canvas/canvas_change.dart';
-import 'package:pixelart/components/canvas/canvas_history_item.dart';
 import 'package:pixelart/components/canvas/canvas_painter.dart';
-import 'package:pixelart/components/canvas/tools/canvas_draw_tool.dart';
-import 'package:pixelart/components/canvas/tools/canvas_erase_tool.dart';
-import 'package:pixelart/components/canvas/tools/canvas_tool.dart';
-import 'package:pixelart/components/canvas/tools/canvas_tool_context.dart';
+import 'package:pixelart/components/canvas/canvas_settings.dart';
+import 'package:pixelart/components/canvas/image_change.dart';
+import 'package:pixelart/components/canvas/random_access_image.dart';
+import 'package:pixelart/components/canvas/tools/tool.dart';
+import 'package:pixelart/components/canvas/tools/use_tool_arguments.dart';
 import 'package:pixelart/components/unconstrained_interactive_viewer.dart';
 
 class Canvas extends StatefulWidget {
-  final int width, height;
-  final Color? initialFillColor;
-  final Color? selectedColor;
-  final bool showGrid;
-  final int minScaleToShowGrid;
-  final double maxScale;
+  final RandomAccessImage initialImage;
+  final CanvasSettings initialSettings;
   final void Function({required bool canUndo, required bool canRedo})
       onHistoryChanged;
 
   const Canvas({
     super.key,
-    required this.width,
-    required this.height,
-    required this.initialFillColor,
-    required this.selectedColor,
-    required this.showGrid,
+    required this.initialImage,
+    required this.initialSettings,
     required this.onHistoryChanged,
-    this.minScaleToShowGrid = 5,
-    this.maxScale = 100,
   });
 
   @override
   State<Canvas> createState() => CanvasState();
 }
 
+typedef ChangeHistoryItem = ({ImageChange change, ImageChange reverseChange});
+
 class CanvasState extends State<Canvas> {
   final _unconstrainedInteractiveViewerKey =
       GlobalKey<UnconstrainedInteractiveViewerState>();
   late CanvasPainter _painter;
 
-  final List<CanvasHistoryItem> _history = [];
-  final List<CanvasHistoryItem> _undoneHistory = [];
+  Offset? _pointerOffset;
+  ChangeHistoryItem? _incompleteHistoryItem;
+  final List<ChangeHistoryItem> _history = [];
+  final List<ChangeHistoryItem> _undoneHistory = [];
 
-  Size get size => Size(widget.width.toDouble(), widget.height.toDouble());
-
-  bool get showGrid {
+  bool get _showGridAfterInteraction {
     final scale = _unconstrainedInteractiveViewerKey.currentState?.scale;
-    return widget.showGrid &&
-        (scale == null || scale >= widget.minScaleToShowGrid);
+    return _painter.settings.showGrid &&
+        (scale == null || scale >= _painter.settings.minScaleToShowGrid);
   }
-
-  bool get canUndo => _history.isNotEmpty;
-  bool get canRedo => _undoneHistory.isNotEmpty;
 
   @override
   void initState() {
     super.initState();
 
-    final pixels = _generatePixels(widget.initialFillColor);
     _painter = CanvasPainter(
-      pixels: pixels,
-      showGrid: showGrid,
+      image: widget.initialImage,
+      settings: widget.initialSettings,
     );
   }
 
-  List<List<Color?>> _generatePixels(Color? color) {
-    return List.generate(
-      widget.height,
-      (index) => List.filled(widget.width, color),
-    );
-  }
+  bool get canUndo => _history.isNotEmpty;
+  bool get canRedo => _undoneHistory.isNotEmpty;
 
-  bool isInCanvasBounds(Point<int> point) {
-    return point.x >= 0 &&
-        point.x < widget.width &&
-        point.y >= 0 &&
-        point.y < widget.height;
-  }
-
-  void interactWithPixel(Offset localPosition) {
-    final position = Point(localPosition.dx.toInt(), localPosition.dy.toInt());
-    if (!isInCanvasBounds(position)) return;
-
-    final currentColor = _painter.pixels[position.y][position.x];
-    final selectedColor = widget.selectedColor;
-    if (currentColor == selectedColor) return;
-
-    final CanvasTool tool;
-    if (selectedColor == null) {
-      tool = CanvasEraseTool();
-    } else {
-      tool = CanvasDrawTool();
-    }
-
-    final toolContext = CanvasToolContext(
-      canvasPainter: _painter,
-      selectedColor: selectedColor,
-      position: position,
-    );
-    final change = tool.use(toolContext);
-    _undoneHistory.clear();
-    applyChange(change);
-  }
-
-  void applyChange(CanvasChange change) {
-    _history.add(CanvasHistoryItem(
-      change: change,
-      reverseChange: change.createReverseChange(_painter),
-    ));
-
-    final updatedPainter = change.apply(_painter);
-    setState(() {
-      _painter = updatedPainter;
-    });
-    _historyChanged();
-  }
+  CanvasSettings get settings => _painter.settings;
+  set settings(CanvasSettings value) =>
+      setState(() => _painter = _painter.copyWith(settings: value));
 
   void undo() {
     if (!canUndo) return;
@@ -124,9 +67,10 @@ class CanvasState extends State<Canvas> {
     final historyItem = _history.removeLast();
     _undoneHistory.add(historyItem);
 
-    final updatedPainter = historyItem.reverseChange.apply(_painter);
     setState(() {
-      _painter = updatedPainter;
+      _painter = _painter.copyWith(
+        image: _painter.image.copyWithChange(historyItem.reverseChange),
+      );
     });
     _historyChanged();
   }
@@ -135,7 +79,29 @@ class CanvasState extends State<Canvas> {
     if (!canRedo) return;
 
     final historyItem = _undoneHistory.removeLast();
-    applyChange(historyItem.change);
+
+    setState(() {
+      _painter = _painter.copyWith(
+        image: _painter.image.copyWithChange(historyItem.change),
+      );
+
+      _history.add(historyItem);
+    });
+
+    _historyChanged();
+  }
+
+  void clearIncompleteHistoryItem() {
+    final incompleteHistoryItem = _incompleteHistoryItem;
+    if (incompleteHistoryItem == null) return;
+
+    setState(() {
+      _painter = _painter.copyWith(
+        image:
+            _painter.image.copyWithChange(incompleteHistoryItem.reverseChange),
+      );
+      _incompleteHistoryItem = null;
+    });
   }
 
   void _historyChanged() {
@@ -145,29 +111,112 @@ class CanvasState extends State<Canvas> {
     );
   }
 
+  ChangeHistoryItem _buildChangeHistoryItem(ImageChange change) => (
+        change: change,
+        reverseChange: ImageChange(
+          pixelChanges: {
+            for (var position in change.pixelChanges.keys)
+              position: _painter.image.pixels[position.y][position.x],
+          },
+        ),
+      );
+
+  UseToolArguments _buildToolArguments(Offset pointerOffset) {
+    final pointerPosition = Point(
+      pointerOffset.dx.toInt(),
+      pointerOffset.dy.toInt(),
+    );
+
+    return UseToolArguments(
+      settings: _painter.settings,
+      image: _painter.image,
+      incompleteChange: _incompleteHistoryItem?.change,
+      cursorPosition: pointerPosition,
+    );
+  }
+
+  void _handleChange(CompletableImageChange? completableChange) {
+    clearIncompleteHistoryItem();
+    if (completableChange == null) return;
+    final historyItem = _buildChangeHistoryItem(completableChange.change);
+
+    setState(() {
+      _undoneHistory.clear();
+      _painter = _painter.copyWith(
+        image: _painter.image.copyWithChange(historyItem.change),
+      );
+
+      if (completableChange.completed) {
+        _history.add(historyItem);
+      } else {
+        _incompleteHistoryItem = historyItem;
+      }
+    });
+
+    _historyChanged();
+  }
+
+  void _onPointerDown(Offset pointerOffset) {
+    final toolArguments = _buildToolArguments(pointerOffset);
+    final completableChange =
+        _painter.settings.tool.onPointerDown(toolArguments);
+    _handleChange(completableChange);
+  }
+
+  void _onPointerMove(Offset pointerOffset) {
+    final toolArguments = _buildToolArguments(pointerOffset);
+    final completableChange =
+        _painter.settings.tool.onPointerMove(toolArguments);
+    _handleChange(completableChange);
+  }
+
+  void _onPointerUp(Offset pointerOffset) {
+    final toolArguments = _buildToolArguments(pointerOffset);
+    final completableChange = _painter.settings.tool.onPointerUp(toolArguments);
+    _handleChange(completableChange);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final imageSize = Size(
+      _painter.image.width.toDouble(),
+      _painter.image.height.toDouble(),
+    );
+
     return UnconstrainedInteractiveViewer(
       key: _unconstrainedInteractiveViewerKey,
-      contentSize: size,
+      contentSize: imageSize,
       minScale: 1,
       onInteractionEnd: (_) => setState(() {
-        _painter = CanvasPainter(
-          pixels: _painter.pixels,
-          showGrid: showGrid,
+        _painter = _painter.copyWith(
+          settings: _painter.settings.copyWith(
+            showGrid: _showGridAfterInteraction,
+          ),
         );
       }),
       child: GestureDetector(
-        onTapDown: (details) => interactWithPixel(details.localPosition),
-        onVerticalDragUpdate: (details) =>
-            interactWithPixel(details.localPosition),
-        onHorizontalDragUpdate: (details) =>
-            interactWithPixel(details.localPosition),
+        onTapDown: (details) => _onPointerDown(details.localPosition),
+        onPanDown: (details) => _onPointerDown(details.localPosition),
+        onTapUp: (details) => _onPointerUp(details.localPosition),
+        onVerticalDragUpdate: (details) {
+          _onPointerMove(details.localPosition);
+          setState(() => _pointerOffset = details.localPosition);
+        },
+        onHorizontalDragUpdate: (details) {
+          _onPointerMove(details.localPosition);
+          setState(() => _pointerOffset = details.localPosition);
+        },
+        onVerticalDragStart: (details) {
+          _onPointerDown(details.localPosition);
+          setState(() => _pointerOffset = details.localPosition);
+        },
+        onVerticalDragEnd: (details) => _onPointerUp(_pointerOffset!),
+        onHorizontalDragEnd: (details) => _onPointerUp(_pointerOffset!),
         child: CustomPaint(
           willChange: true,
           isComplex: true,
           painter: _painter,
-          size: size,
+          size: imageSize,
         ),
       ),
     );
