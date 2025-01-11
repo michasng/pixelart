@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pixelart/components/canvas/canvas.dart';
+import 'package:pixelart/components/canvas/canvas_page_menu.dart';
 import 'package:pixelart/components/canvas/canvas_settings.dart';
 import 'package:pixelart/components/canvas/random_access_image.dart';
 import 'package:pixelart/components/canvas/tools/draw_tool.dart';
@@ -78,24 +79,26 @@ class _CanvasPageState extends State<CanvasPage> {
           ),
         ],
       ),
-      body: Canvas(
-        key: _canvasKey,
-        initialImage: RandomAccessImage.filled(
-          width: 32,
-          height: 16,
-          color: Colors.grey,
+      body: CanvasPageMenu(
+        child: Canvas(
+          key: _canvasKey,
+          initialImage: RandomAccessImage.filled(
+            width: 32,
+            height: 16,
+            color: Colors.grey,
+          ),
+          initialSettings: CanvasSettings(
+            tool: DrawTool(),
+            primaryColor: CanvasPage.colors.first,
+            showGrid: true,
+          ),
+          onHistoryChanged: ({required canUndo, required canRedo}) {
+            setState(() {
+              _canUndo = canUndo;
+              _canRedo = canRedo;
+            });
+          },
         ),
-        initialSettings: CanvasSettings(
-          tool: DrawTool(),
-          primaryColor: CanvasPage.colors.first,
-          showGrid: true,
-        ),
-        onHistoryChanged: ({required canUndo, required canRedo}) {
-          setState(() {
-            _canUndo = canUndo;
-            _canRedo = canRedo;
-          });
-        },
       ),
     );
   }
