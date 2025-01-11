@@ -1,11 +1,18 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
+import 'package:pixelart/components/canvas/random_access_image.dart';
 
 class CanvasPageMenu extends StatelessWidget {
   final Widget child;
+  final ValueChanged<RandomAccessImage> onImageChanged;
 
   const CanvasPageMenu({
     super.key,
     required this.child,
+    required this.onImageChanged,
   });
 
   @override
@@ -24,8 +31,18 @@ class CanvasPageMenu extends StatelessWidget {
                   child: const MenuAcceleratorLabel('&New'),
                 ),
                 MenuItemButton(
-                  onPressed: () {
-                    // TODO: implement
+                  onPressed: () async {
+                    final filePickerResult =
+                        await FilePicker.platform.pickFiles(
+                      type: FileType.image,
+                    );
+                    if (filePickerResult == null) return;
+                    final file = filePickerResult.files.single;
+                    final bytes =
+                        file.bytes ?? await File(file.path!).readAsBytes();
+                    final image = img.decodeImage(bytes);
+                    if (image == null) return;
+                    onImageChanged(RandomAccessImage.fromImage(image));
                   },
                   child: const MenuAcceleratorLabel('&Open'),
                 ),

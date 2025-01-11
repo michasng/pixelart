@@ -5,8 +5,10 @@ version: 1.0.0+1
 environment:
   sdk: ">=3.5.4 <4.0.0"
 dependencies:
+  file_picker: ^8.1.7
   flutter:
     sdk: flutter
+  image: ^4.5.2
   meta: ^1.15.0
   vector_math: ^2.1.4
 dev_dependencies:

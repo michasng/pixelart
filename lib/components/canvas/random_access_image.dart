@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:image/image.dart' as img;
 import 'package:meta/meta.dart';
 import 'package:pixelart/components/canvas/image_change.dart';
 import 'package:pixelart/components/copy_matrix.dart';
@@ -19,6 +20,21 @@ class RandomAccessImage {
 
   bool containsPoint(Point<int> point) {
     return point.x >= 0 && point.x < width && point.y >= 0 && point.y < height;
+  }
+
+  factory RandomAccessImage.fromImage(img.Image source) {
+    return RandomAccessImage._(
+      width: source.width,
+      height: source.height,
+      pixels: List.generate(
+        source.height,
+        (y) => List.generate(source.width, (x) {
+          final pixel = source.getPixelSafe(x, y);
+          return Color.fromARGB(pixel.a.toInt(), pixel.r.toInt(),
+              pixel.g.toInt(), pixel.b.toInt());
+        }),
+      ),
+    );
   }
 
   factory RandomAccessImage.filled({

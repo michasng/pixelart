@@ -45,6 +45,15 @@ class CanvasState extends State<Canvas> {
     );
   }
 
+  set image(RandomAccessImage value) {
+    setState(() {
+      _painter = CanvasPainter(
+        image: value,
+        settings: widget.initialSettings,
+      );
+    });
+  }
+
   bool get canUndo => _history.isNotEmpty;
   bool get canRedo => _undoneHistory.isNotEmpty;
 

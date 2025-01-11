@@ -80,6 +80,7 @@ class _CanvasPageState extends State<CanvasPage> {
         ],
       ),
       body: CanvasPageMenu(
+        onImageChanged: (image) => _canvasKey.currentState?.image = image,
         child: Canvas(
           key: _canvasKey,
           initialImage: RandomAccessImage.filled(
