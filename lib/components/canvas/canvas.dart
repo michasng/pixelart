@@ -7,7 +7,7 @@ import 'package:pixelart/components/canvas/image_change.dart';
 import 'package:pixelart/components/canvas/random_access_image.dart';
 import 'package:pixelart/components/canvas/tools/tool.dart';
 import 'package:pixelart/components/canvas/tools/use_tool_arguments.dart';
-import 'package:pixelart/components/unconstrained_interactive_viewer.dart';
+import 'package:pixelart/components/interaction/interactive_container.dart';
 
 class Canvas extends StatefulWidget {
   final RandomAccessImage initialImage;
@@ -29,20 +29,11 @@ class Canvas extends StatefulWidget {
 typedef ChangeHistoryItem = ({ImageChange change, ImageChange reverseChange});
 
 class CanvasState extends State<Canvas> {
-  final _unconstrainedInteractiveViewerKey =
-      GlobalKey<UnconstrainedInteractiveViewerState>();
   late CanvasPainter _painter;
 
-  Offset? _pointerOffset;
   ChangeHistoryItem? _incompleteHistoryItem;
   final List<ChangeHistoryItem> _history = [];
   final List<ChangeHistoryItem> _undoneHistory = [];
-
-  bool get _showGridAfterInteraction {
-    final scale = _unconstrainedInteractiveViewerKey.currentState?.scale;
-    return _painter.settings.showGrid &&
-        (scale == null || scale >= _painter.settings.minScaleToShowGrid);
-  }
 
   @override
   void initState() {
@@ -156,26 +147,6 @@ class CanvasState extends State<Canvas> {
     _historyChanged();
   }
 
-  void _onPointerDown(Offset pointerOffset) {
-    final toolArguments = _buildToolArguments(pointerOffset);
-    final completableChange =
-        _painter.settings.tool.onPointerDown(toolArguments);
-    _handleChange(completableChange);
-  }
-
-  void _onPointerMove(Offset pointerOffset) {
-    final toolArguments = _buildToolArguments(pointerOffset);
-    final completableChange =
-        _painter.settings.tool.onPointerMove(toolArguments);
-    _handleChange(completableChange);
-  }
-
-  void _onPointerUp(Offset pointerOffset) {
-    final toolArguments = _buildToolArguments(pointerOffset);
-    final completableChange = _painter.settings.tool.onPointerUp(toolArguments);
-    _handleChange(completableChange);
-  }
-
   @override
   Widget build(BuildContext context) {
     final imageSize = Size(
@@ -183,41 +154,40 @@ class CanvasState extends State<Canvas> {
       _painter.image.height.toDouble(),
     );
 
-    return UnconstrainedInteractiveViewer(
-      key: _unconstrainedInteractiveViewerKey,
-      contentSize: imageSize,
-      minScale: 1,
-      onInteractionEnd: (_) => setState(() {
+    return InteractiveContainer(
+      backgroundColor: Colors.grey,
+      childSize: imageSize,
+      onPointerDown: (event) {
+        final toolArguments = _buildToolArguments(event.localPosition);
+        final completableChange =
+            _painter.settings.tool.onPointerDown(toolArguments);
+        _handleChange(completableChange);
+      },
+      onPointerMove: (event) {
+        final toolArguments = _buildToolArguments(event.localPosition);
+        final completableChange =
+            _painter.settings.tool.onPointerMove(toolArguments);
+        _handleChange(completableChange);
+      },
+      onPointerUp: (event) {
+        final toolArguments = _buildToolArguments(event.localPosition);
+        final completableChange =
+            _painter.settings.tool.onPointerUp(toolArguments);
+        _handleChange(completableChange);
+      },
+      onScaleChanged: (scale) => setState(() {
         _painter = _painter.copyWith(
           settings: _painter.settings.copyWith(
-            showGrid: _showGridAfterInteraction,
+            showGrid: _painter.settings.showGrid &&
+                scale >= _painter.settings.minScaleToShowGrid,
           ),
         );
       }),
-      child: GestureDetector(
-        onTapDown: (details) => _onPointerDown(details.localPosition),
-        onPanDown: (details) => _onPointerDown(details.localPosition),
-        onTapUp: (details) => _onPointerUp(details.localPosition),
-        onVerticalDragUpdate: (details) {
-          _onPointerMove(details.localPosition);
-          setState(() => _pointerOffset = details.localPosition);
-        },
-        onHorizontalDragUpdate: (details) {
-          _onPointerMove(details.localPosition);
-          setState(() => _pointerOffset = details.localPosition);
-        },
-        onVerticalDragStart: (details) {
-          _onPointerDown(details.localPosition);
-          setState(() => _pointerOffset = details.localPosition);
-        },
-        onVerticalDragEnd: (details) => _onPointerUp(_pointerOffset!),
-        onHorizontalDragEnd: (details) => _onPointerUp(_pointerOffset!),
-        child: CustomPaint(
-          willChange: true,
-          isComplex: true,
-          painter: _painter,
-          size: imageSize,
-        ),
+      child: CustomPaint(
+        willChange: true,
+        isComplex: true,
+        painter: _painter,
+        size: imageSize,
       ),
     );
   }
