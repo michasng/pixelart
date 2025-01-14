@@ -74,9 +74,14 @@ class _CanvasPageState extends State<CanvasPage> {
               style: IconButton.styleFrom(foregroundColor: toUiColor(color)),
               icon: const Icon(Icons.color_lens),
             ),
+          const Spacer(),
+          IconButton(
+            onPressed: () => setColorDrawTool(null),
+            icon: Image.asset("assets/icons/pencil.png"),
+          ),
           IconButton(
             onPressed: setEraseTool,
-            icon: const Icon(Icons.color_lens),
+            icon: Image.asset("assets/icons/eraser.png"),
           ),
         ],
       ),

@@ -14,8 +14,8 @@ class App extends StatelessWidget {
       title: 'Pixel Art App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
       ),
+      debugShowCheckedModeBanner: false,
       home: const CanvasPage(),
     );
   }
