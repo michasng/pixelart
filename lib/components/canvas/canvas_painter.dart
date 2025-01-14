@@ -1,11 +1,12 @@
 import 'package:flutter/rendering.dart';
+import 'package:image/image.dart' as img;
 import 'package:meta/meta.dart';
 import 'package:pixelart/components/canvas/canvas_settings.dart';
-import 'package:pixelart/components/canvas/random_access_image.dart';
+import 'package:pixelart/components/canvas/colors.dart';
 
 @immutable
 class CanvasPainter extends CustomPainter {
-  final RandomAccessImage image;
+  final img.Image image;
   final CanvasSettings settings;
 
   const CanvasPainter({
@@ -14,7 +15,7 @@ class CanvasPainter extends CustomPainter {
   });
 
   CanvasPainter copyWith({
-    RandomAccessImage? image,
+    img.Image? image,
     CanvasSettings? settings,
   }) =>
       CanvasPainter(
@@ -25,12 +26,13 @@ class CanvasPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
-    final pixels = image.pixels;
 
-    for (int y = 0; y < pixels.length; y++) {
-      for (int x = 0; x < pixels[y].length; x++) {
-        if (pixels[y][x] != null) {
-          paint.color = pixels[y][x]!;
+    for (int y = 0; y < image.height; y++) {
+      for (int x = 0; x < image.width; x++) {
+        final pixel = image.getPixel(x, y);
+
+        if (pixel.a != 0) {
+          paint.color = toUiColor(pixel);
           paint.style = PaintingStyle.fill;
           canvas.drawRect(
             Rect.fromLTWH(x.toDouble(), y.toDouble(), 1.0, 1.0),

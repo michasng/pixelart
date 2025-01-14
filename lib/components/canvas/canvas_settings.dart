@@ -1,12 +1,13 @@
 import 'dart:ui';
 
+import 'package:image/image.dart' as img;
 import 'package:meta/meta.dart';
 import 'package:pixelart/components/canvas/tools/tool.dart';
 
 @immutable
 class CanvasSettings {
   final Tool tool;
-  final Color primaryColor;
+  final img.Color primaryColor;
   final bool showGrid;
   final Color gridColor;
   final int minScaleToShowGrid;
@@ -23,7 +24,7 @@ class CanvasSettings {
 
   CanvasSettings copyWith({
     Tool? tool,
-    Color? primaryColor,
+    img.Color? primaryColor,
     bool? showGrid,
     Color? gridColor,
     int? minScaleToShowGrid,

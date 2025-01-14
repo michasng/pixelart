@@ -3,11 +3,10 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
-import 'package:pixelart/components/canvas/random_access_image.dart';
 
 class CanvasPageMenu extends StatelessWidget {
   final Widget child;
-  final ValueChanged<RandomAccessImage> onImageChanged;
+  final ValueChanged<img.Image> onImageChanged;
 
   const CanvasPageMenu({
     super.key,
@@ -42,7 +41,7 @@ class CanvasPageMenu extends StatelessWidget {
                         file.bytes ?? await File(file.path!).readAsBytes();
                     final image = img.decodeImage(bytes);
                     if (image == null) return;
-                    onImageChanged(RandomAccessImage.fromImage(image));
+                    onImageChanged(image);
                   },
                   child: const MenuAcceleratorLabel('&Open'),
                 ),

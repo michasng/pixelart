@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
 import 'package:pixelart/components/canvas/canvas.dart';
 import 'package:pixelart/components/canvas/canvas_page_menu.dart';
 import 'package:pixelart/components/canvas/canvas_settings.dart';
-import 'package:pixelart/components/canvas/random_access_image.dart';
+import 'package:pixelart/components/canvas/colors.dart';
 import 'package:pixelart/components/canvas/tools/draw_tool.dart';
 import 'package:pixelart/components/canvas/tools/erase_tool.dart';
 
 class CanvasPage extends StatefulWidget {
-  static const colors = [
-    Colors.black,
-    Colors.red,
-    Colors.green,
-    Colors.blue,
-    Colors.amber,
+  static final colors = [
+    PixelColors.black,
+    PixelColors.white,
+    PixelColors.red,
+    PixelColors.green,
+    PixelColors.blue,
   ];
 
   const CanvasPage({super.key});
@@ -34,7 +35,7 @@ class _CanvasPageState extends State<CanvasPage> {
     _canvasKey.currentState?.redo();
   }
 
-  void setColorDrawTool(Color? color) {
+  void setColorDrawTool(img.Color? color) {
     final canvasState = _canvasKey.currentState;
     if (canvasState == null) return;
     canvasState.settings = canvasState.settings.copyWith(
@@ -70,7 +71,7 @@ class _CanvasPageState extends State<CanvasPage> {
           for (var color in CanvasPage.colors)
             IconButton(
               onPressed: () => setColorDrawTool(color),
-              style: IconButton.styleFrom(foregroundColor: color),
+              style: IconButton.styleFrom(foregroundColor: toUiColor(color)),
               icon: const Icon(Icons.color_lens),
             ),
           IconButton(
@@ -83,10 +84,10 @@ class _CanvasPageState extends State<CanvasPage> {
         onImageChanged: (image) => _canvasKey.currentState?.image = image,
         child: Canvas(
           key: _canvasKey,
-          initialImage: RandomAccessImage.filled(
+          initialImage: img.Image(
             width: 32,
             height: 16,
-            color: Colors.grey,
+            numChannels: 4,
           ),
           initialSettings: CanvasSettings(
             tool: DrawTool(),

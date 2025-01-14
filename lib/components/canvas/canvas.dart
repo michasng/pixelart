@@ -1,16 +1,16 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
 import 'package:pixelart/components/canvas/canvas_painter.dart';
 import 'package:pixelart/components/canvas/canvas_settings.dart';
 import 'package:pixelart/components/canvas/image_change.dart';
-import 'package:pixelart/components/canvas/random_access_image.dart';
 import 'package:pixelart/components/canvas/tools/tool.dart';
 import 'package:pixelart/components/canvas/tools/use_tool_arguments.dart';
 import 'package:pixelart/components/interaction/interactive_container.dart';
 
 class Canvas extends StatefulWidget {
-  final RandomAccessImage initialImage;
+  final img.Image initialImage;
   final CanvasSettings initialSettings;
   final void Function({required bool canUndo, required bool canRedo})
       onHistoryChanged;
@@ -45,7 +45,7 @@ class CanvasState extends State<Canvas> {
     );
   }
 
-  set image(RandomAccessImage value) {
+  set image(img.Image value) {
     setState(() {
       _painter = CanvasPainter(
         image: value,
@@ -69,7 +69,7 @@ class CanvasState extends State<Canvas> {
 
     setState(() {
       _painter = _painter.copyWith(
-        image: _painter.image.copyWithChange(historyItem.reverseChange),
+        image: historyItem.reverseChange.apply(_painter.image),
       );
     });
     _historyChanged();
@@ -82,7 +82,7 @@ class CanvasState extends State<Canvas> {
 
     setState(() {
       _painter = _painter.copyWith(
-        image: _painter.image.copyWithChange(historyItem.change),
+        image: historyItem.change.apply(_painter.image),
       );
 
       _history.add(historyItem);
@@ -97,8 +97,7 @@ class CanvasState extends State<Canvas> {
 
     setState(() {
       _painter = _painter.copyWith(
-        image:
-            _painter.image.copyWithChange(incompleteHistoryItem.reverseChange),
+        image: incompleteHistoryItem.reverseChange.apply(_painter.image),
       );
       _incompleteHistoryItem = null;
     });
@@ -116,7 +115,7 @@ class CanvasState extends State<Canvas> {
         reverseChange: ImageChange(
           pixelChanges: {
             for (var position in change.pixelChanges.keys)
-              position: _painter.image.pixels[position.y][position.x],
+              position: _painter.image.getPixel(position.x, position.y),
           },
         ),
       );
@@ -143,7 +142,7 @@ class CanvasState extends State<Canvas> {
     setState(() {
       _undoneHistory.clear();
       _painter = _painter.copyWith(
-        image: _painter.image.copyWithChange(historyItem.change),
+        image: historyItem.change.apply(_painter.image),
       );
 
       if (completableChange.completed) {
