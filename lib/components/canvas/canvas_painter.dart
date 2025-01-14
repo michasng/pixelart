@@ -39,14 +39,14 @@ class CanvasPainter extends CustomPainter {
             paint,
           );
         }
-        paint.style = PaintingStyle.stroke;
         if (settings.showGrid) {
           paint.color = settings.gridColor;
+          paint.style = PaintingStyle.stroke;
+          canvas.drawRect(
+            Rect.fromLTWH(x.toDouble(), y.toDouble(), 1.0, 1.0),
+            paint,
+          );
         }
-        canvas.drawRect(
-          Rect.fromLTWH(x.toDouble(), y.toDouble(), 1.0, 1.0),
-          paint,
-        );
       }
     }
   }

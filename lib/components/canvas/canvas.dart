@@ -186,7 +186,7 @@ class CanvasState extends State<Canvas> {
       onScaleChanged: (scale) => setState(() {
         _painter = _painter.copyWith(
           settings: _painter.settings.copyWith(
-            showGrid: _painter.settings.showGrid &&
+            showGrid: widget.initialSettings.showGrid &&
                 scale >= _painter.settings.minScaleToShowGrid,
           ),
         );
