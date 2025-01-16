@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_resizable_container/flutter_resizable_container.dart';
 import 'package:image/image.dart' as img;
 import 'package:pixelart/components/canvas/canvas.dart';
 import 'package:pixelart/components/canvas/canvas_page_menu.dart';
 import 'package:pixelart/components/canvas/canvas_settings.dart';
 import 'package:pixelart/components/canvas/colors.dart';
+import 'package:pixelart/components/canvas/colors/color_menu.dart';
 import 'package:pixelart/components/canvas/tool_bar.dart';
 import 'package:pixelart/components/canvas/tools/draw_tool.dart';
 import 'package:pixelart/components/canvas/tools/tool.dart';
@@ -67,40 +69,47 @@ class _CanvasPageState extends State<CanvasPage> {
             onPressed: _canRedo ? _redo : null,
             icon: const Icon(Icons.redo),
           ),
-          const Spacer(),
-          for (var color in CanvasPage.colors)
-            IconButton(
-              onPressed: () => setPrimaryColor(color),
-              style: IconButton.styleFrom(foregroundColor: toUiColor(color)),
-              icon: const Icon(Icons.color_lens),
-            ),
         ],
       ),
       body: CanvasPageMenu(
         onImageChanged: (image) => _canvasKey.currentState?.image = image,
-        child: ToolBar(
-          onToolSelected: setTool,
-          child: ClipRect(
-            child: Canvas(
-              key: _canvasKey,
-              initialImage: img.Image(
-                width: 32,
-                height: 16,
-                numChannels: 4,
+        child: ResizableContainer(
+          direction: Axis.horizontal,
+          children: [
+            ResizableChild(
+              child: ColorMenu(
+                colors: CanvasPage.colors,
+                onSelect: setPrimaryColor,
               ),
-              initialSettings: CanvasSettings(
-                tool: DrawTool(),
-                primaryColor: CanvasPage.colors.first,
-                showGrid: true,
-              ),
-              onHistoryChanged: ({required canUndo, required canRedo}) {
-                setState(() {
-                  _canUndo = canUndo;
-                  _canRedo = canRedo;
-                });
-              },
+              size: ResizableSize.pixels(160),
             ),
-          ),
+            ResizableChild(
+              child: ToolBar(
+                onToolSelected: setTool,
+                child: ClipRect(
+                  child: Canvas(
+                    key: _canvasKey,
+                    initialImage: img.Image(
+                      width: 32,
+                      height: 16,
+                      numChannels: 4,
+                    ),
+                    initialSettings: CanvasSettings(
+                      tool: DrawTool(),
+                      primaryColor: CanvasPage.colors.first,
+                      showGrid: true,
+                    ),
+                    onHistoryChanged: ({required canUndo, required canRedo}) {
+                      setState(() {
+                        _canUndo = canUndo;
+                        _canRedo = canRedo;
+                      });
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

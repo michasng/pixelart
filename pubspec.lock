@@ -65,6 +65,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
+  decimal:
+    dependency: transitive
+    description:
+      name: decimal
+      sha256: da8f65df568345f2738cc8b0de74971c86d2d93ce5fc8c4ec094f6b7c5d48eb5
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   fake_async:
     dependency: transitive
     description:
@@ -110,6 +118,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.24"
+  flutter_resizable_container:
+    dependency: "direct main"
+    description:
+      name: flutter_resizable_container
+      sha256: "4e5f3350e93699de864e2dcd6928ccd3d7a8ea258ad2502bead40b17d483e43b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -120,6 +136,22 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  http:
+    dependency: transitive
+    description:
+      name: http
+      sha256: b9c29a161230ee03d3ccf545097fccd9b87a5264228c5d348202e0f0c28f9010
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.2"
+  http_parser:
+    dependency: transitive
+    description:
+      name: http_parser
+      sha256: "2aa08ce0341cc9b354a498388e30986515406668dbcc4f7c950c3e715496693b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.2"
   image:
     dependency: "direct main"
     description:
@@ -128,6 +160,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.5.2"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: "00f33b908655e606b86d2ade4710a231b802eec6f11e87e4ea3783fd72077a50"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.20.1"
   leak_tracker:
     dependency: transitive
     description:
@@ -216,6 +256,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.1"
+  rational:
+    dependency: transitive
+    description:
+      name: rational
+      sha256: cb808fb6f1a839e6fc5f7d8cb3b0a10e1db48b3be102de73938c627f0b636336
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.3"
   sky_engine:
     dependency: transitive
     description: flutter
