@@ -4,8 +4,9 @@ import 'package:pixelart/components/canvas/canvas.dart';
 import 'package:pixelart/components/canvas/canvas_page_menu.dart';
 import 'package:pixelart/components/canvas/canvas_settings.dart';
 import 'package:pixelart/components/canvas/colors.dart';
+import 'package:pixelart/components/canvas/tool_bar.dart';
 import 'package:pixelart/components/canvas/tools/draw_tool.dart';
-import 'package:pixelart/components/canvas/tools/erase_tool.dart';
+import 'package:pixelart/components/canvas/tools/tool.dart';
 
 class CanvasPage extends StatefulWidget {
   static final colors = [
@@ -35,20 +36,19 @@ class _CanvasPageState extends State<CanvasPage> {
     _canvasKey.currentState?.redo();
   }
 
-  void setColorDrawTool(img.Color? color) {
+  void setPrimaryColor(img.Color primaryColor) {
     final canvasState = _canvasKey.currentState;
     if (canvasState == null) return;
     canvasState.settings = canvasState.settings.copyWith(
-      tool: DrawTool(),
-      primaryColor: color,
+      primaryColor: primaryColor,
     );
   }
 
-  void setEraseTool() {
+  void setTool(Tool tool) {
     final canvasState = _canvasKey.currentState;
     if (canvasState == null) return;
     canvasState.settings = canvasState.settings.copyWith(
-      tool: EraseTool(),
+      tool: tool,
     );
   }
 
@@ -70,41 +70,37 @@ class _CanvasPageState extends State<CanvasPage> {
           const Spacer(),
           for (var color in CanvasPage.colors)
             IconButton(
-              onPressed: () => setColorDrawTool(color),
+              onPressed: () => setPrimaryColor(color),
               style: IconButton.styleFrom(foregroundColor: toUiColor(color)),
               icon: const Icon(Icons.color_lens),
             ),
-          const Spacer(),
-          IconButton(
-            onPressed: () => setColorDrawTool(null),
-            icon: Image.asset("assets/icons/pencil.png"),
-          ),
-          IconButton(
-            onPressed: setEraseTool,
-            icon: Image.asset("assets/icons/eraser.png"),
-          ),
         ],
       ),
       body: CanvasPageMenu(
         onImageChanged: (image) => _canvasKey.currentState?.image = image,
-        child: Canvas(
-          key: _canvasKey,
-          initialImage: img.Image(
-            width: 32,
-            height: 16,
-            numChannels: 4,
+        child: ToolBar(
+          onToolSelected: setTool,
+          child: ClipRect(
+            child: Canvas(
+              key: _canvasKey,
+              initialImage: img.Image(
+                width: 32,
+                height: 16,
+                numChannels: 4,
+              ),
+              initialSettings: CanvasSettings(
+                tool: DrawTool(),
+                primaryColor: CanvasPage.colors.first,
+                showGrid: true,
+              ),
+              onHistoryChanged: ({required canUndo, required canRedo}) {
+                setState(() {
+                  _canUndo = canUndo;
+                  _canRedo = canRedo;
+                });
+              },
+            ),
           ),
-          initialSettings: CanvasSettings(
-            tool: DrawTool(),
-            primaryColor: CanvasPage.colors.first,
-            showGrid: true,
-          ),
-          onHistoryChanged: ({required canUndo, required canRedo}) {
-            setState(() {
-              _canUndo = canUndo;
-              _canRedo = canRedo;
-            });
-          },
         ),
       ),
     );

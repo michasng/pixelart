@@ -4,6 +4,8 @@ import 'package:pixelart/components/canvas/tools/use_tool_arguments.dart';
 import 'package:pixelart/components/image_extension.dart';
 
 class EraseTool implements Tool {
+  const EraseTool();
+
   @override
   CompletableImageChange? onPointerDown(UseToolArguments args) {
     if (!args.image.containsPoint(args.cursorPosition)) return null;

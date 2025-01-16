@@ -4,6 +4,8 @@ import 'package:pixelart/components/canvas/tools/use_tool_arguments.dart';
 import 'package:pixelart/components/image_extension.dart';
 
 class DrawTool implements Tool {
+  const DrawTool();
+
   @override
   CompletableImageChange? onPointerDown(UseToolArguments args) {
     if (!args.image.containsPoint(args.cursorPosition)) return null;
