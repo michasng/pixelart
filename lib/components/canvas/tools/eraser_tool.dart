@@ -4,8 +4,8 @@ import 'package:pixelart/components/canvas/tools/tool.dart';
 import 'package:pixelart/components/canvas/tools/use_tool_arguments.dart';
 import 'package:pixelart/components/image_extension.dart';
 
-class EraseTool implements Tool {
-  const EraseTool();
+class EraserTool implements Tool {
+  const EraserTool();
 
   @override
   AssetIcon get assetIcon => AssetIcon.eraser;
