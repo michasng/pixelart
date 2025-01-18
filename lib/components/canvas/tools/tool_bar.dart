@@ -6,17 +6,20 @@ import 'package:pixelart/components/canvas/tools/tool.dart';
 
 class ToolBar extends StatelessWidget {
   final Widget child;
+  final Tool? activeTool;
   final ValueChanged<Tool> onToolSelected;
   final List<Tool> tools;
 
   const ToolBar({
     super.key,
     required this.child,
+    required this.activeTool,
     required this.onToolSelected,
   }) : tools = const [DrawTool(), EraseTool()];
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Expanded(child: child),
@@ -30,6 +33,11 @@ class ToolBar extends StatelessWidget {
                   icon: AssetIconImage(
                     assetIcon: tool.assetIcon,
                   ),
+                  style: tool == activeTool
+                      ? IconButton.styleFrom(
+                          backgroundColor: theme.primaryColor,
+                        )
+                      : null,
                 ),
             ],
           ),

@@ -39,20 +39,25 @@ class _CanvasPageState extends State<CanvasPage> {
     _canvasKey.currentState?.redo();
   }
 
-  void setPrimaryColor(img.Color primaryColor) {
+  set primaryColor(img.Color value) {
     final canvasState = _canvasKey.currentState;
     if (canvasState == null) return;
     canvasState.settings = canvasState.settings.copyWith(
-      primaryColor: primaryColor,
+      primaryColor: value,
     );
   }
 
-  void setTool(Tool tool) {
+  Tool? get activeTool => _canvasKey.currentState?.settings.tool;
+
+  set tool(Tool value) {
     final canvasState = _canvasKey.currentState;
     if (canvasState == null) return;
-    canvasState.settings = canvasState.settings.copyWith(
-      tool: tool,
-    );
+
+    setState(() {
+      canvasState.settings = canvasState.settings.copyWith(
+        tool: value,
+      );
+    });
   }
 
   @override
@@ -67,13 +72,14 @@ class _CanvasPageState extends State<CanvasPage> {
             ResizableChild(
               child: ColorMenu(
                 colors: CanvasPage.colors,
-                onSelect: setPrimaryColor,
+                onSelect: (color) => primaryColor = color,
               ),
               size: ResizableSize.pixels(160),
             ),
             ResizableChild(
               child: ToolBar(
-                onToolSelected: setTool,
+                activeTool: activeTool,
+                onToolSelected: (color) => tool = color,
                 child: ClipRect(
                   child: Canvas(
                     key: _canvasKey,
