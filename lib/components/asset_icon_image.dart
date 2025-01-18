@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 
 enum AssetIcon {
   eraser("eraser.png"),
-  fill("fill.png"),
+  eyedropper("eyedropper.png"),
   gradient("gradient.png"),
   hand("hand.png"),
   line("line.png"),
   move("move.png"),
   ovalFilled("oval_filled.png"),
   oval("oval.png"),
+  paintBucket("paint_bucket.png"),
   pencil("pencil.png"),
-  pickColor("pick_color.png"),
   rectangleFilled("rectangle_filled.png"),
   rectangle("rectangle.png"),
   redo("redo.png"),
