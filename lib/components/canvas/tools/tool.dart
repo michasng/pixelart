@@ -1,15 +1,14 @@
-import 'package:pixelart/components/asset_icon_image.dart';
-import 'package:pixelart/components/canvas/image_change.dart';
-import 'package:pixelart/components/canvas/tools/use_tool_arguments.dart';
+import 'dart:math';
 
-typedef CompletableImageChange = ({ImageChange change, bool completed});
+import 'package:pixelart/components/asset_icon_image.dart';
+import 'package:pixelart/components/canvas/canvas.dart';
 
 abstract interface class Tool {
   AssetIcon get assetIcon;
 
-  CompletableImageChange? onPointerDown(UseToolArguments args);
+  void onPointerDown(Point<int> pointerPosition, CanvasState canvas);
 
-  CompletableImageChange? onPointerMove(UseToolArguments args);
+  void onPointerMove(Point<int> pointerPosition, CanvasState canvas);
 
-  CompletableImageChange? onPointerUp(UseToolArguments args);
+  void onPointerUp(Point<int> pointerPosition, CanvasState canvas);
 }

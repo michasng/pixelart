@@ -1,13 +1,10 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:pixelart/components/canvas/canvas_painter.dart';
 import 'package:pixelart/components/canvas/canvas_settings.dart';
 import 'package:pixelart/components/canvas/image_change.dart';
-import 'package:pixelart/components/canvas/tools/tool.dart';
-import 'package:pixelart/components/canvas/tools/use_tool_arguments.dart';
 import 'package:pixelart/components/interaction/interactive_container.dart';
+import 'package:pixelart/components/offset_extension.dart';
 
 class Canvas extends StatefulWidget {
   final img.Image initialImage;
@@ -44,6 +41,8 @@ class CanvasState extends State<Canvas> {
       settings: widget.initialSettings,
     );
   }
+
+  ImageChange? get incompleteChange => _incompleteHistoryItem?.change;
 
   img.Image get image => _painter.image;
 
@@ -122,24 +121,9 @@ class CanvasState extends State<Canvas> {
         ),
       );
 
-  UseToolArguments _buildToolArguments(Offset pointerOffset) {
-    final pointerPosition = Point(
-      pointerOffset.dx.toInt(),
-      pointerOffset.dy.toInt(),
-    );
-
-    return UseToolArguments(
-      settings: _painter.settings,
-      image: _painter.image,
-      incompleteChange: _incompleteHistoryItem?.change,
-      cursorPosition: pointerPosition,
-    );
-  }
-
-  void _handleChange(CompletableImageChange? completableChange) {
+  void handleChange(ImageChange change, {required bool completed}) {
     clearIncompleteHistoryItem();
-    if (completableChange == null) return;
-    final historyItem = _buildChangeHistoryItem(completableChange.change);
+    final historyItem = _buildChangeHistoryItem(change);
 
     setState(() {
       _undoneHistory.clear();
@@ -147,7 +131,7 @@ class CanvasState extends State<Canvas> {
         image: historyItem.change.apply(_painter.image),
       );
 
-      if (completableChange.completed) {
+      if (completed) {
         _history.add(historyItem);
       } else {
         _incompleteHistoryItem = historyItem;
@@ -168,22 +152,22 @@ class CanvasState extends State<Canvas> {
       backgroundColor: Colors.grey,
       childSize: imageSize,
       onPointerDown: (event) {
-        final toolArguments = _buildToolArguments(event.localPosition);
-        final completableChange =
-            _painter.settings.tool.onPointerDown(toolArguments);
-        _handleChange(completableChange);
+        _painter.settings.tool.onPointerDown(
+          event.localPosition.toPointInt(),
+          this,
+        );
       },
       onPointerMove: (event) {
-        final toolArguments = _buildToolArguments(event.localPosition);
-        final completableChange =
-            _painter.settings.tool.onPointerMove(toolArguments);
-        _handleChange(completableChange);
+        _painter.settings.tool.onPointerMove(
+          event.localPosition.toPointInt(),
+          this,
+        );
       },
       onPointerUp: (event) {
-        final toolArguments = _buildToolArguments(event.localPosition);
-        final completableChange =
-            _painter.settings.tool.onPointerUp(toolArguments);
-        _handleChange(completableChange);
+        _painter.settings.tool.onPointerUp(
+          event.localPosition.toPointInt(),
+          this,
+        );
       },
       onScaleChanged: (scale) => setState(() {
         _painter = _painter.copyWith(

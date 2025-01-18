@@ -1,7 +1,9 @@
+import 'dart:math';
+
 import 'package:pixelart/components/asset_icon_image.dart';
+import 'package:pixelart/components/canvas/canvas.dart';
 import 'package:pixelart/components/canvas/image_change.dart';
 import 'package:pixelart/components/canvas/tools/tool.dart';
-import 'package:pixelart/components/canvas/tools/use_tool_arguments.dart';
 import 'package:pixelart/components/image_extension.dart';
 
 class EraserTool implements Tool {
@@ -11,53 +13,53 @@ class EraserTool implements Tool {
   AssetIcon get assetIcon => AssetIcon.eraser;
 
   @override
-  CompletableImageChange? onPointerDown(UseToolArguments args) {
-    if (!args.image.containsPoint(args.cursorPosition)) return null;
+  void onPointerDown(Point<int> pointerPosition, CanvasState canvas) {
+    if (!canvas.image.containsPoint(pointerPosition)) return;
 
     final change = ImageChange(
       pixelChanges: {
-        args.cursorPosition: null,
+        pointerPosition: null,
       },
     );
 
-    return (
-      change: change,
+    canvas.handleChange(
+      change,
       completed: false,
     );
   }
 
   @override
-  CompletableImageChange? onPointerMove(UseToolArguments args) {
-    var change = args.incompleteChange;
-    if (change == null) return null;
+  void onPointerMove(Point<int> pointerPosition, CanvasState canvas) {
+    var change = canvas.incompleteChange;
+    if (change == null) return;
 
-    if (args.image.containsPoint(args.cursorPosition)) {
+    if (canvas.image.containsPoint(pointerPosition)) {
       change = change.copyWith(pixelChanges: {
         ...change.pixelChanges,
-        args.cursorPosition: null,
+        pointerPosition: null,
       });
     }
 
-    return (
-      change: change,
+    canvas.handleChange(
+      change,
       completed: false,
     );
   }
 
   @override
-  CompletableImageChange? onPointerUp(UseToolArguments args) {
-    var change = args.incompleteChange;
-    if (change == null) return null;
+  void onPointerUp(Point<int> pointerPosition, CanvasState canvas) {
+    var change = canvas.incompleteChange;
+    if (change == null) return;
 
-    if (args.image.containsPoint(args.cursorPosition)) {
+    if (canvas.image.containsPoint(pointerPosition)) {
       change = change.copyWith(pixelChanges: {
         ...change.pixelChanges,
-        args.cursorPosition: null,
+        pointerPosition: null,
       });
     }
 
-    return (
-      change: change,
+    canvas.handleChange(
+      change,
       completed: true,
     );
   }
