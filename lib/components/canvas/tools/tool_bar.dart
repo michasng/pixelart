@@ -4,21 +4,16 @@ import 'package:pixelart/components/canvas/tools/draw_tool.dart';
 import 'package:pixelart/components/canvas/tools/erase_tool.dart';
 import 'package:pixelart/components/canvas/tools/tool.dart';
 
-typedef ToolDefinition = ({Tool tool, AssetIcon assetIcon});
-
 class ToolBar extends StatelessWidget {
   final Widget child;
   final ValueChanged<Tool> onToolSelected;
-  final List<ToolDefinition> toolDefinitions;
+  final List<Tool> tools;
 
   const ToolBar({
     super.key,
     required this.child,
     required this.onToolSelected,
-  }) : toolDefinitions = const [
-          (tool: DrawTool(), assetIcon: AssetIcon.pencil),
-          (tool: EraseTool(), assetIcon: AssetIcon.eraser),
-        ];
+  }) : tools = const [DrawTool(), EraseTool()];
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +24,11 @@ class ToolBar extends StatelessWidget {
           padding: EdgeInsets.all(2),
           child: Column(
             children: [
-              for (final definition in toolDefinitions)
+              for (final tool in tools)
                 IconButton(
-                  onPressed: () => onToolSelected(definition.tool),
+                  onPressed: () => onToolSelected(tool),
                   icon: AssetIconImage(
-                    assetIcon: definition.assetIcon,
+                    assetIcon: tool.assetIcon,
                   ),
                 ),
             ],
