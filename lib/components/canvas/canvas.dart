@@ -45,6 +45,8 @@ class CanvasState extends State<Canvas> {
     );
   }
 
+  img.Image get image => _painter.image;
+
   set image(img.Image value) {
     setState(() {
       _painter = CanvasPainter(

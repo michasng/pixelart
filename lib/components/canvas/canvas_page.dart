@@ -60,6 +60,7 @@ class _CanvasPageState extends State<CanvasPage> {
     return Scaffold(
       body: CanvasPageMenuBar(
         onImageChanged: (image) => _canvasKey.currentState?.image = image,
+        getImage: () => _canvasKey.currentState?.image,
         child: ResizableContainer(
           direction: Axis.horizontal,
           children: [

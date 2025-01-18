@@ -7,11 +7,13 @@ import 'package:image/image.dart' as img;
 class CanvasPageMenuBar extends StatelessWidget {
   final Widget child;
   final ValueChanged<img.Image> onImageChanged;
+  final img.Image? Function() getImage;
 
   const CanvasPageMenuBar({
     super.key,
     required this.child,
     required this.onImageChanged,
+    required this.getImage,
   });
 
   @override
@@ -47,8 +49,21 @@ class CanvasPageMenuBar extends StatelessWidget {
                 ),
                 Divider(),
                 MenuItemButton(
-                  onPressed: () {
-                    // TODO: implement
+                  onPressed: () async {
+                    final image = getImage();
+                    if (image == null) return;
+
+                    // TODO: handle mobile and web
+                    final filePath = await FilePicker.platform.saveFile(
+                      type: FileType.image,
+                    );
+                    if (filePath == null) return;
+
+                    final file = File(filePath);
+                    final imageBytes = img.encodeNamedImage(filePath, image);
+                    if (imageBytes == null) return;
+
+                    await file.writeAsBytes(imageBytes);
                   },
                   child: const MenuAcceleratorLabel('&Save'),
                 ),
