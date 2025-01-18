@@ -7,6 +7,7 @@ import 'package:pixelart/components/canvas/canvas_settings.dart';
 import 'package:pixelart/components/canvas/colors/color_menu.dart';
 import 'package:pixelart/components/canvas/colors/colors.dart';
 import 'package:pixelart/components/canvas/history_buttons.dart';
+import 'package:pixelart/components/canvas/tools/erase_tool.dart';
 import 'package:pixelart/components/canvas/tools/pencil_tool.dart';
 import 'package:pixelart/components/canvas/tools/tool.dart';
 import 'package:pixelart/components/canvas/tools/tool_bar.dart';
@@ -19,6 +20,8 @@ class CanvasPage extends StatefulWidget {
     PixelColors.green,
     PixelColors.blue,
   ];
+
+  static final tools = [PencilTool(), EraseTool()];
 
   const CanvasPage({super.key});
 
@@ -80,6 +83,7 @@ class _CanvasPageState extends State<CanvasPage> {
               child: ToolBar(
                 activeTool: activeTool,
                 onToolSelected: (color) => tool = color,
+                tools: CanvasPage.tools,
                 child: ClipRect(
                   child: Canvas(
                     key: _canvasKey,
@@ -89,7 +93,7 @@ class _CanvasPageState extends State<CanvasPage> {
                       numChannels: 4,
                     ),
                     initialSettings: CanvasSettings(
-                      tool: PencilTool(),
+                      tool: CanvasPage.tools.first,
                       primaryColor: CanvasPage.colors.first,
                       showGrid: true,
                     ),

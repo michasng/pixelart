@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pixelart/components/asset_icon_image.dart';
-import 'package:pixelart/components/canvas/tools/pencil_tool.dart';
-import 'package:pixelart/components/canvas/tools/erase_tool.dart';
 import 'package:pixelart/components/canvas/tools/tool.dart';
 
 class ToolBar extends StatelessWidget {
@@ -15,7 +13,8 @@ class ToolBar extends StatelessWidget {
     required this.child,
     required this.activeTool,
     required this.onToolSelected,
-  }) : tools = const [PencilTool(), EraseTool()];
+    required this.tools,
+  });
 
   @override
   Widget build(BuildContext context) {
