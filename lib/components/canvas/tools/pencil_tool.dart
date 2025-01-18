@@ -4,8 +4,8 @@ import 'package:pixelart/components/canvas/tools/tool.dart';
 import 'package:pixelart/components/canvas/tools/use_tool_arguments.dart';
 import 'package:pixelart/components/image_extension.dart';
 
-class DrawTool implements Tool {
-  const DrawTool();
+class PencilTool implements Tool {
+  const PencilTool();
 
   @override
   AssetIcon get assetIcon => AssetIcon.pencil;

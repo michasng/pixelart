@@ -7,7 +7,7 @@ import 'package:pixelart/components/canvas/canvas_settings.dart';
 import 'package:pixelart/components/canvas/colors/color_menu.dart';
 import 'package:pixelart/components/canvas/colors/colors.dart';
 import 'package:pixelart/components/canvas/history_buttons.dart';
-import 'package:pixelart/components/canvas/tools/draw_tool.dart';
+import 'package:pixelart/components/canvas/tools/pencil_tool.dart';
 import 'package:pixelart/components/canvas/tools/tool.dart';
 import 'package:pixelart/components/canvas/tools/tool_bar.dart';
 
@@ -89,7 +89,7 @@ class _CanvasPageState extends State<CanvasPage> {
                       numChannels: 4,
                     ),
                     initialSettings: CanvasSettings(
-                      tool: DrawTool(),
+                      tool: PencilTool(),
                       primaryColor: CanvasPage.colors.first,
                       showGrid: true,
                     ),
