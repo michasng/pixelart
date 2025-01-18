@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pixelart/components/asset_icon_image.dart';
 import 'package:pixelart/components/canvas/tools/draw_tool.dart';
 import 'package:pixelart/components/canvas/tools/erase_tool.dart';
 import 'package:pixelart/components/canvas/tools/tool.dart';
 
-typedef ToolDefinition = ({Tool tool, String imagePath});
+typedef ToolDefinition = ({Tool tool, AssetIcon assetIcon});
 
 class ToolBar extends StatelessWidget {
-  static const _imageSize = 16;
-  static const _imageScale = 2;
-
   final Widget child;
   final ValueChanged<Tool> onToolSelected;
   final List<ToolDefinition> toolDefinitions;
@@ -18,16 +16,12 @@ class ToolBar extends StatelessWidget {
     required this.child,
     required this.onToolSelected,
   }) : toolDefinitions = const [
-          (imagePath: "assets/icons/pencil.png", tool: DrawTool()),
-          (imagePath: "assets/icons/eraser.png", tool: EraseTool()),
+          (tool: DrawTool(), assetIcon: AssetIcon.pencil),
+          (tool: EraseTool(), assetIcon: AssetIcon.eraser),
         ];
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final logicalImageSize =
-        _imageSize / mediaQuery.devicePixelRatio * _imageScale;
-
     return Row(
       children: [
         Expanded(child: child),
@@ -38,12 +32,8 @@ class ToolBar extends StatelessWidget {
               for (final definition in toolDefinitions)
                 IconButton(
                   onPressed: () => onToolSelected(definition.tool),
-                  icon: Image.asset(
-                    definition.imagePath,
-                    width: logicalImageSize,
-                    height: logicalImageSize,
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.none,
+                  icon: AssetIconImage(
+                    assetIcon: definition.assetIcon,
                   ),
                 ),
             ],

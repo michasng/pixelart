@@ -6,6 +6,7 @@ import 'package:pixelart/components/canvas/canvas_page_menu_bar.dart';
 import 'package:pixelart/components/canvas/canvas_settings.dart';
 import 'package:pixelart/components/canvas/colors/color_menu.dart';
 import 'package:pixelart/components/canvas/colors/colors.dart';
+import 'package:pixelart/components/canvas/history_buttons.dart';
 import 'package:pixelart/components/canvas/tools/draw_tool.dart';
 import 'package:pixelart/components/canvas/tools/tool.dart';
 import 'package:pixelart/components/canvas/tools/tool_bar.dart';
@@ -57,20 +58,6 @@ class _CanvasPageState extends State<CanvasPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pixel Art App'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          IconButton(
-            onPressed: _canUndo ? _undo : null,
-            icon: const Icon(Icons.undo),
-          ),
-          IconButton(
-            onPressed: _canRedo ? _redo : null,
-            icon: const Icon(Icons.redo),
-          ),
-        ],
-      ),
       body: CanvasPageMenuBar(
         onImageChanged: (image) => _canvasKey.currentState?.image = image,
         child: ResizableContainer(
@@ -111,6 +98,10 @@ class _CanvasPageState extends State<CanvasPage> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: HistoryButtons(
+        onUndo: _canUndo ? _undo : null,
+        onRedo: _canRedo ? _redo : null,
       ),
     );
   }
