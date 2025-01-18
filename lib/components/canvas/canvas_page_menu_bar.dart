@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 
 class CanvasPageMenuBar extends StatelessWidget {
@@ -69,8 +70,10 @@ class CanvasPageMenuBar extends StatelessWidget {
                 ),
                 Divider(),
                 MenuItemButton(
-                  onPressed: () {
-                    // TODO: implement
+                  onPressed: () async {
+                    await SystemNavigator.pop(); // preferred on mobile
+                    exit(0); // fallback for desktop
+                    // TODO: handle web (or hide the option)
                   },
                   child: const MenuAcceleratorLabel('E&xit'),
                 ),
