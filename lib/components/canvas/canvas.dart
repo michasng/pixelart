@@ -8,14 +8,16 @@ import 'package:pixelart/components/offset_extension.dart';
 
 class Canvas extends StatefulWidget {
   final img.Image initialImage;
-  final CanvasSettings initialSettings;
+  final CanvasSettings settings;
+  final ValueChanged<CanvasSettings> onChangeSettings;
   final void Function({required bool canUndo, required bool canRedo})
       onHistoryChanged;
 
   const Canvas({
     super.key,
     required this.initialImage,
-    required this.initialSettings,
+    required this.settings,
+    required this.onChangeSettings,
     required this.onHistoryChanged,
   });
 
@@ -38,7 +40,7 @@ class CanvasState extends State<Canvas> {
 
     _painter = CanvasPainter(
       image: widget.initialImage,
-      settings: widget.initialSettings,
+      getSettings: () => widget.settings,
     );
   }
 
@@ -48,19 +50,14 @@ class CanvasState extends State<Canvas> {
 
   set image(img.Image value) {
     setState(() {
-      _painter = CanvasPainter(
-        image: value,
-        settings: widget.initialSettings,
-      );
+      _painter = _painter.copyWith(image: value);
     });
   }
 
   bool get canUndo => _history.isNotEmpty;
   bool get canRedo => _undoneHistory.isNotEmpty;
 
-  CanvasSettings get settings => _painter.settings;
-  set settings(CanvasSettings value) =>
-      setState(() => _painter = _painter.copyWith(settings: value));
+  CanvasSettings get settings => widget.settings;
 
   void undo() {
     if (!canUndo) return;
@@ -152,29 +149,26 @@ class CanvasState extends State<Canvas> {
       backgroundColor: Colors.grey,
       childSize: imageSize,
       onPointerDown: (event) {
-        _painter.settings.tool.onPointerDown(
+        settings.tool.onPointerDown(
           event.localPosition.toPointInt(),
           this,
         );
       },
       onPointerMove: (event) {
-        _painter.settings.tool.onPointerMove(
+        settings.tool.onPointerMove(
           event.localPosition.toPointInt(),
           this,
         );
       },
       onPointerUp: (event) {
-        _painter.settings.tool.onPointerUp(
+        settings.tool.onPointerUp(
           event.localPosition.toPointInt(),
           this,
         );
       },
       onScaleChanged: (scale) => setState(() {
         _painter = _painter.copyWith(
-          settings: _painter.settings.copyWith(
-            showGrid: widget.initialSettings.showGrid &&
-                scale >= _painter.settings.minScaleToShowGrid,
-          ),
+          scale: scale,
         );
       }),
       child: CustomPaint(

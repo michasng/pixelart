@@ -8,6 +8,7 @@ import 'package:pixelart/components/canvas/colors/color_menu.dart';
 import 'package:pixelart/components/canvas/colors/colors.dart';
 import 'package:pixelart/components/canvas/history_buttons.dart';
 import 'package:pixelart/components/canvas/tools/eraser_tool.dart';
+import 'package:pixelart/components/canvas/tools/eyedropper_tool.dart';
 import 'package:pixelart/components/canvas/tools/pencil_tool.dart';
 import 'package:pixelart/components/canvas/tools/tool.dart';
 import 'package:pixelart/components/canvas/tools/tool_bar.dart';
@@ -21,7 +22,7 @@ class CanvasPage extends StatefulWidget {
     PixelColors.blue,
   ];
 
-  static final tools = [PencilTool(), EraserTool()];
+  static final tools = [PencilTool(), EraserTool(), EyedropperTool()];
 
   const CanvasPage({super.key});
 
@@ -33,6 +34,27 @@ class _CanvasPageState extends State<CanvasPage> {
   final _canvasKey = GlobalKey<CanvasState>();
   bool _canUndo = false;
   bool _canRedo = false;
+  CanvasSettings _settings = CanvasSettings(
+    tool: CanvasPage.tools.first,
+    primaryColor: CanvasPage.colors.first,
+    showGrid: true,
+  );
+
+  CanvasSettings get settings => _settings;
+
+  set settings(CanvasSettings value) => setState(() => _settings = value);
+
+  set primaryColor(img.Color value) {
+    settings = settings.copyWith(
+      primaryColor: value,
+    );
+  }
+
+  set tool(Tool value) {
+    settings = settings.copyWith(
+      tool: value,
+    );
+  }
 
   void _undo() {
     _canvasKey.currentState?.undo();
@@ -40,27 +62,6 @@ class _CanvasPageState extends State<CanvasPage> {
 
   void _redo() {
     _canvasKey.currentState?.redo();
-  }
-
-  set primaryColor(img.Color value) {
-    final canvasState = _canvasKey.currentState;
-    if (canvasState == null) return;
-    canvasState.settings = canvasState.settings.copyWith(
-      primaryColor: value,
-    );
-  }
-
-  Tool? get activeTool => _canvasKey.currentState?.settings.tool;
-
-  set tool(Tool value) {
-    final canvasState = _canvasKey.currentState;
-    if (canvasState == null) return;
-
-    setState(() {
-      canvasState.settings = canvasState.settings.copyWith(
-        tool: value,
-      );
-    });
   }
 
   @override
@@ -81,7 +82,7 @@ class _CanvasPageState extends State<CanvasPage> {
             ),
             ResizableChild(
               child: ToolBar(
-                activeTool: activeTool,
+                activeTool: settings.tool,
                 onToolSelected: (color) => tool = color,
                 tools: CanvasPage.tools,
                 child: ClipRect(
@@ -92,11 +93,8 @@ class _CanvasPageState extends State<CanvasPage> {
                       height: 16,
                       numChannels: 4,
                     ),
-                    initialSettings: CanvasSettings(
-                      tool: CanvasPage.tools.first,
-                      primaryColor: CanvasPage.colors.first,
-                      showGrid: true,
-                    ),
+                    settings: settings,
+                    onChangeSettings: (value) => settings = value,
                     onHistoryChanged: ({required canUndo, required canRedo}) {
                       setState(() {
                         _canUndo = canUndo;

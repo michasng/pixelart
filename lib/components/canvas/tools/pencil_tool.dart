@@ -18,7 +18,7 @@ class PencilTool implements Tool {
 
     final change = ImageChange(
       pixelChanges: {
-        pointerPosition: canvas.settings.primaryColor,
+        pointerPosition: canvas.widget.settings.primaryColor,
       },
     );
 
