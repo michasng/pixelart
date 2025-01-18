@@ -5,6 +5,7 @@ import 'package:pixelart/components/canvas/canvas.dart';
 import 'package:pixelart/components/canvas/canvas_page_menu_bar.dart';
 import 'package:pixelart/components/canvas/canvas_settings.dart';
 import 'package:pixelart/components/canvas/colors/color_menu.dart';
+import 'package:pixelart/components/canvas/colors/color_preview.dart';
 import 'package:pixelart/components/canvas/colors/colors.dart';
 import 'package:pixelart/components/canvas/history_buttons.dart';
 import 'package:pixelart/components/canvas/tools/eraser_tool.dart';
@@ -74,9 +75,15 @@ class _CanvasPageState extends State<CanvasPage> {
           direction: Axis.horizontal,
           children: [
             ResizableChild(
-              child: ColorMenu(
-                colors: CanvasPage.colors,
-                onSelect: (color) => primaryColor = color,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ColorMenu(
+                    colors: CanvasPage.colors,
+                    onSelect: (color) => primaryColor = color,
+                  ),
+                  ColorPreview(color: settings.primaryColor),
+                ],
               ),
               size: ResizableSize.pixels(160),
             ),
