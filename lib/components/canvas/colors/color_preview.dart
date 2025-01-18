@@ -12,15 +12,9 @@ class ColorPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        height: 32,
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey, width: 4),
-          color: toUiColor(color),
-        ),
-      ),
+    return Container(
+      height: 32,
+      color: toUiColor(color),
     );
   }
 }

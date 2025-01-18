@@ -67,6 +67,8 @@ class _CanvasPageState extends State<CanvasPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: CanvasPageMenuBar(
         onImageChanged: (image) => _canvasKey.currentState?.image = image,
@@ -75,15 +77,19 @@ class _CanvasPageState extends State<CanvasPage> {
           direction: Axis.horizontal,
           children: [
             ResizableChild(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ColorMenu(
-                    colors: CanvasPage.colors,
-                    onSelect: (color) => primaryColor = color,
-                  ),
-                  ColorPreview(color: settings.primaryColor),
-                ],
+              child: Container(
+                color: theme.primaryColor,
+                padding: EdgeInsets.all(4),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ColorMenu(
+                      colors: CanvasPage.colors,
+                      onSelect: (color) => primaryColor = color,
+                    ),
+                    ColorPreview(color: settings.primaryColor),
+                  ],
+                ),
               ),
               size: ResizableSize.pixels(160),
             ),

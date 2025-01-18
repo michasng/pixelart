@@ -19,10 +19,12 @@ class ToolBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return Row(
       children: [
         Expanded(child: child),
-        Padding(
+        Container(
+          color: theme.primaryColor,
           padding: EdgeInsets.all(2),
           child: Column(
             children: [

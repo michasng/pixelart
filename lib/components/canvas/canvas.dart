@@ -146,7 +146,7 @@ class CanvasState extends State<Canvas> {
     );
 
     return InteractiveContainer(
-      backgroundColor: Colors.grey,
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       childSize: imageSize,
       onPointerDown: (event) {
         settings.tool.onPointerDown(
