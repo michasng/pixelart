@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
-import 'package:pixelart/components/canvas/colors.dart';
+import 'package:pixelart/components/canvas/colors/colors.dart';
 
 class ColorMenu extends StatelessWidget {
   final List<img.Color> colors;

@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:image/image.dart' as img;
 import 'package:meta/meta.dart';
-import 'package:pixelart/components/canvas/colors.dart';
+import 'package:pixelart/components/canvas/colors/colors.dart';
 
 @immutable
 class ImageChange {

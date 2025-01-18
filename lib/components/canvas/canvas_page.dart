@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_resizable_container/flutter_resizable_container.dart';
 import 'package:image/image.dart' as img;
 import 'package:pixelart/components/canvas/canvas.dart';
-import 'package:pixelart/components/canvas/canvas_page_menu.dart';
+import 'package:pixelart/components/canvas/canvas_page_menu_bar.dart';
 import 'package:pixelart/components/canvas/canvas_settings.dart';
-import 'package:pixelart/components/canvas/colors.dart';
 import 'package:pixelart/components/canvas/colors/color_menu.dart';
-import 'package:pixelart/components/canvas/tool_bar.dart';
+import 'package:pixelart/components/canvas/colors/colors.dart';
 import 'package:pixelart/components/canvas/tools/draw_tool.dart';
 import 'package:pixelart/components/canvas/tools/tool.dart';
+import 'package:pixelart/components/canvas/tools/tool_bar.dart';
 
 class CanvasPage extends StatefulWidget {
   static final colors = [
@@ -71,7 +71,7 @@ class _CanvasPageState extends State<CanvasPage> {
           ),
         ],
       ),
-      body: CanvasPageMenu(
+      body: CanvasPageMenuBar(
         onImageChanged: (image) => _canvasKey.currentState?.image = image,
         child: ResizableContainer(
           direction: Axis.horizontal,

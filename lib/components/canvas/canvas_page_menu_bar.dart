@@ -4,11 +4,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 
-class CanvasPageMenu extends StatelessWidget {
+class CanvasPageMenuBar extends StatelessWidget {
   final Widget child;
   final ValueChanged<img.Image> onImageChanged;
 
-  const CanvasPageMenu({
+  const CanvasPageMenuBar({
     super.key,
     required this.child,
     required this.onImageChanged,

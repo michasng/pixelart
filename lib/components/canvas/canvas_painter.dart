@@ -2,7 +2,7 @@ import 'package:flutter/rendering.dart';
 import 'package:image/image.dart' as img;
 import 'package:meta/meta.dart';
 import 'package:pixelart/components/canvas/canvas_settings.dart';
-import 'package:pixelart/components/canvas/colors.dart';
+import 'package:pixelart/components/canvas/colors/colors.dart';
 
 @immutable
 class CanvasPainter extends CustomPainter {
